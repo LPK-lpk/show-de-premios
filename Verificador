@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificador de Cartelas — Bingo Paróquia</title>
+<style>
+  :root {
+    --verde-escuro: #0A3D1A;
+    --verde-medio: #1A6B30;
+    --verde-claro: #A8E063;
+    --verde-fundo: #EAF5D0;
+    --cinza-fundo: #F5F5F5;
+    --cinza-borda: #D0D0D0;
+    --texto: #1A1A1A;
+    --texto-mudo: #666;
+    --branco: #FFFFFF;
+    --amarelo: #FFD600;
+    --laranja: #FF7A00;
+    --vermelho: #D32F2F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--cinza-fundo); color: var(--texto); min-height: 100vh; }
+
+  header { background: var(--verde-escuro); color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; font-weight: 600; }
+  header .sub { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .status-canal { display: flex; align-items: center; gap: 6px; font-size: 13px; background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 20px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #aaa; transition: background .3s; }
+  .dot.ativo { background: var(--verde-claro); }
+
+  .pedras-bar { background: var(--verde-escuro); padding: 10px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pedras-bar .label { color: rgba(255,255,255,.7); font-size: 12px; white-space: nowrap; }
+  .pedras-lista { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+  .pedra-badge { background: var(--verde-claro); color: var(--verde-escuro); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px; min-width: 28px; text-align: center; }
+  .pedra-badge.nova { animation: pulso .5s ease; }
+  @keyframes pulso { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+
+  .input-manual { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 10px 20px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .input-manual label { font-size: 12px; color: var(--texto-mudo); white-space: nowrap; }
+  .input-manual input[type=number] { width: 70px; border: 1px solid var(--cinza-borda); border-radius: 6px; padding: 5px 8px; font-size: 13px; }
+  .input-manual input[type=number]:focus { outline: 2px solid var(--verde-medio); border-color: transparent; }
+
+  .modalidade-bar { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .modalidade-bar label { font-size: 12px; color: var(--texto-mudo); font-weight: 600; }
+  .modalidade-bar .opcoes { display: flex; gap: 10px; flex-wrap: wrap; }
+  .check-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  .check-item input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--verde-medio); }
+
+  .contadores { display: flex; gap: 0; border-bottom: 1px solid var(--cinza-borda); background: white; }
+  .contador { flex: 1; text-align: center; padding: 10px 8px; border-right: 1px solid var(--cinza-borda); }
+  .contador:last-child { border-right: none; }
+  .contador .num { font-size: 22px; font-weight: 700; color: var(--verde-escuro); line-height: 1; }
+  .contador .leg { font-size: 10px; color: var(--texto-mudo); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .contador.destaque .num { color: var(--laranja); }
+
+  .filtros { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 20px; background: white; border-bottom: 1px solid var(--cinza-borda); }
+  .chip { padding: 4px 12px; border-radius: 16px; border: 1px solid var(--cinza-borda); font-size: 12px; cursor: pointer; background: white; transition: background .15s; }
+  .chip.ativo { background: var(--verde-escuro); color: white; border-color: var(--verde-escuro); }
+
+  .btn { padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: opacity .15s; }
+  .btn:active { transform: scale(.97); }
+  .btn-verde { background: var(--verde-medio); color: white; }
+  .btn-verde:hover { background: var(--verde-escuro); }
+  .btn-cinza { background: var(--cinza-fundo); color: var(--texto); border: 1px solid var(--cinza-borda); }
+  .btn-cinza:hover { background: #e8e8e8; }
+  .btn-danger { background: var(--vermelho); color: white; }
+
+  .grade-wrapper { padding: 16px 20px; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+
+  .cartela { background: white; border: 2px solid var(--cinza-borda); border-radius: 10px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+  .cartela.quina { border-color: var(--amarelo); box-shadow: 0 0 0 3px rgba(255,214,0,.35); }
+  .cartela.cheia { border-color: var(--laranja); box-shadow: 0 0 0 4px rgba(255,122,0,.4); animation: vibrar .4s ease; }
+  @keyframes vibrar { 0%,100% { transform: translate(0); } 25% { transform: translate(-3px); } 75% { transform: translate(3px); } }
+
+  .cartela-header { background: var(--verde-escuro); color: white; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .cartela-nome { font-size: 12px; font-weight: 600; }
+  .cartela-id { font-size: 10px; opacity: .6; }
+  .cartela-badges { display: flex; gap: 4px; }
+  .badge-quina { background: var(--amarelo); color: #5a4000; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px; }
+  .badge-cheia { background: var(--laranja); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px; }
+
+  .cartela-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 6px; }
+  .header-col { text-align: center; font-size: 11px; font-weight: 700; color: var(--verde-medio); padding: 3px 0; letter-spacing: 1px; }
+  .celula { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 4px; background: var(--cinza-fundo); color: var(--texto); transition: background .3s, color .3s; }
+  .celula.marcada { background: var(--verde-medio); color: white; }
+  .celula.free { background: #e8f5d0; color: var(--verde-medio); font-size: 9px; font-weight: 400; text-transform: uppercase; }
+  .celula.free.marcada { background: var(--verde-escuro); color: var(--verde-claro); }
+
+  .estado-vazio { text-align: center; padding: 48px 20px; color: var(--texto-mudo); }
+  .estado-vazio .icon { font-size: 40px; margin-bottom: 12px; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 999; align-items: center; justify-content: center; }
+  .overlay.ativo { display: flex; }
+  .modal { background: white; border-radius: 16px; padding: 32px 40px; text-align: center; max-width: 380px; width: 90%; animation: entrar .3s cubic-bezier(.22,1,.36,1); }
+  @keyframes entrar { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal .emoji { font-size: 56px; margin-bottom: 12px; }
+  .modal h2 { font-size: 22px; font-weight: 700; color: var(--verde-escuro); margin-bottom: 6px; }
+  .modal .cartela-info { font-size: 14px; color: var(--texto-mudo); margin-bottom: 20px; }
+  .modal .tipo-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 20px; }
+  .tipo-quina { background: var(--amarelo); color: #5a4000; }
+  .tipo-cheia { background: var(--laranja); color: white; }
+  .modal .btn-fechar { display: block; width: 100%; background: var(--verde-escuro); color: white; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .modal .btn-fechar:hover { background: var(--verde-medio); }
+
+  .loading { text-align: center; padding: 32px; color: var(--texto-mudo); font-size: 14px; }
+  .spinner { width: 24px; height: 24px; margin: 0 auto 12px; border: 3px solid var(--cinza-borda); border-top-color: var(--verde-medio); border-radius: 50%; animation: girar .8s linear infinite; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎱 Verificador de Cartelas</h1>
+    <div class="sub">Bingo — Quermesse Paróquia Sagrado Coração de Jesus · Marília-SP</div>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+    <button class="btn btn-verde" onclick="carregarCartelas()">⬇️ Carregar cartelas</button>
+    <button class="btn btn-cinza" onclick="limparTudo()">🗑️ Limpar</button>
+    <div class="status-canal">
+      <div class="dot" id="dot-canal"></div>
+      <span id="txt-canal">Canal desconectado</span>
+    </div>
+  </div>
+</header>
+
+<!-- PEDRAS SORTEADAS -->
+<div class="pedras-bar">
+  <span class="label">Pedras sorteadas:</span>
+  <div class="pedras-lista" id="pedras-lista">
+    <span style="color:rgba(255,255,255,.4); font-size:12px;">Aguardando sorteio…</span>
+  </div>
+  <span style="color:rgba(255,255,255,.6); font-size:11px;" id="total-pedras">0 pedras</span>
+</div>
+
+<!-- INPUT MANUAL -->
+<div class="input-manual">
+  <label>Adicionar pedra manualmente (1–75):</label>
+  <input type="number" id="pedra-manual" min="1" max="75" placeholder="1–75">
+  <button class="btn btn-cinza" onclick="adicionarPedraManual()">Adicionar</button>
+  <button class="btn btn-danger" onclick="removerUltimaPedra()" style="padding:5px 12px;">↩ Desfazer</button>
+  <button class="btn btn-cinza" onclick="resetarPedras()" style="margin-left:auto">🔄 Resetar rodada</button>
+</div>
+
+<!-- MODALIDADE DA RODADA -->
+<div class="modalidade-bar">
+  <label>Prêmios desta rodada:</label>
+  <div class="opcoes">
+    <label class="check-item">
+      <input type="checkbox" id="mod-linha" checked> Quina (linha / coluna)
+    </label>
+    <label class="check-item">
+      <input type="checkbox" id="mod-diagonal"> Diagonal
+    </label>
+    <label class="check-item">
+      <input type="checkbox" id="mod-cantos"> Quatro cantos
+    </label>
+  </div>
+  <span style="font-size:12px; color:var(--texto-mudo); margin-left:8px">+ Cartela cheia (sempre ativa)</span>
+</div>
+
+<!-- CONTADORES -->
+<div class="contadores">
+  <div class="contador">
+    <div class="num" id="cnt-cartelas">0</div>
+    <div class="leg">Cartelas</div>
+  </div>
+  <div class="contador destaque">
+    <div class="num" id="cnt-quina">0</div>
+    <div class="leg">Quinas</div>
+  </div>
+  <div class="contador destaque">
+    <div class="num" id="cnt-cheia">0</div>
+    <div class="leg">Cartela cheia</div>
+  </div>
+  <div class="contador">
+    <div class="num" id="cnt-pedras">0</div>
+    <div class="leg">Pedras</div>
+  </div>
+</div>
+
+<!-- FILTROS -->
+<div class="filtros">
+  <div class="chip ativo" data-filtro="todas" onclick="filtrar(this)">Todas</div>
+  <div class="chip" data-filtro="quina" onclick="filtrar(this)">Com quina</div>
+  <div class="chip" data-filtro="cheia" onclick="filtrar(this)">Cartela cheia</div>
+  <div class="chip" data-filtro="sem" onclick="filtrar(this)">Sem prêmio</div>
+</div>
+
+<!-- GRADE DE CARTELAS -->
+<div class="grade-wrapper">
+  <div class="grade" id="grade">
+    <div class="estado-vazio">
+      <div class="icon">📋</div>
+      <p>Clique em "Carregar cartelas" para buscar do Google Sheets.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GANHADOR -->
+<div class="overlay" id="overlay" onclick="fecharModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="emoji" id="modal-emoji">🎉</div>
+    <h2 id="modal-titulo">Temos um ganhador!</h2>
+    <div class="tipo-badge" id="modal-badge">Quina</div>
+    <div class="cartela-info" id="modal-info">Cartela #001 — João Silva</div>
+    <button class="btn-fechar" onclick="fecharModal()">Confirmar e continuar</button>
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz44Q1ZSeA9xx1amYMImDtsr6a5rV1ol7A5crvXm01L-T0pdW3PhHTo4_BnFiOlLUxtcQ/exec';
+const CANAL_NOME = 'bingo-canal';
+const FREE_ROW = 2;
+const FREE_COL = 2;
+
+let pedrasSorteadas = new Set();
+let cartelas = [];
+let filtroAtivo = 'todas';
+let alertasFila = [];
+let alertandoAgora = false;
+
+// ─── BROADCAST CHANNEL ───────────────────────────────────────
+let canal;
+function iniciarCanal() {
+  try {
+    canal = new BroadcastChannel(CANAL_NOME);
+    canal.onmessage = (e) => {
+      const d = e.data;
+      if (d && d.tipo === 'pedra' && typeof d.numero === 'number') registrarPedra(d.numero, true);
+      if (d && d.tipo === 'resetar') resetarPedras();
+    };
+    document.getElementById('dot-canal').classList.add('ativo');
+    document.getElementById('txt-canal').textContent = 'Canal "' + CANAL_NOME + '" ativo';
+  } catch(e) {
+    document.getElementById('txt-canal').textContent = 'BroadcastChannel indisponível';
+  }
+}
+
+// ─── PEDRAS ──────────────────────────────────────────────────
+function registrarPedra(num, animada = false) {
+  if (num < 1 || num > 75) return;
+  if (pedrasSorteadas.has(num)) return;
+  pedrasSorteadas.add(num);
+  renderizarPedras(animada ? num : null);
+  verificarCartelas();
+  atualizarContadores();
+}
+
+function adicionarPedraManual() {
+  const inp = document.getElementById('pedra-manual');
+  const n = parseInt(inp.value);
+  if (isNaN(n) || n < 1 || n > 75) {
+    inp.focus();
+    inp.style.borderColor = 'red';
+    setTimeout(() => inp.style.borderColor = '', 1200);
+    return;
+  }
+  registrarPedra(n, true);
+  inp.value = '';
+  inp.focus();
+}
+
+function removerUltimaPedra() {
+  const arr = [...pedrasSorteadas];
+  if (!arr.length) return;
+  pedrasSorteadas.delete(arr[arr.length - 1]);
+  renderizarPedras(null);
+  recalcularAlertas();
+  verificarCartelas();
+  atualizarContadores();
+}
+
+function resetarPedras() {
+  if (!confirm('Resetar todas as pedras desta rodada?')) return;
+  pedrasSorteadas.clear();
+  cartelas.forEach(c => { c.quinaJaAlertada = false; c.cheiaJaAlertada = false; });
+  renderizarPedras(null);
+  verificarCartelas();
+  atualizarContadores();
+}
+
+function recalcularAlertas() {
+  cartelas.forEach(c => { c.quinaJaAlertada = false; c.cheiaJaAlertada = false; });
+}
+
+function renderizarPedras(novaNum) {
+  const lista = document.getElementById('pedras-lista');
+  const arr = [...pedrasSorteadas].sort((a,b) => a - b);
+  if (!arr.length) {
+    lista.innerHTML = '<span style="color:rgba(255,255,255,.4); font-size:12px;">Aguardando sorteio…</span>';
+    document.getElementById('total-pedras').textContent = '0 pedras';
+    return;
+  }
+  lista.innerHTML = arr.map(n =>
+    '<span class="pedra-badge' + (n === novaNum ? ' nova' : '') + '">' + n + '</span>'
+  ).join('');
+  document.getElementById('total-pedras').textContent = arr.length + ' pedra' + (arr.length !== 1 ? 's' : '');
+}
+
+// ─── CARREGAR CARTELAS DO SHEETS ─────────────────────────────
+async function carregarCartelas() {
+  const grade = document.getElementById('grade');
+  grade.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando cartelas do Google Sheets…</div>';
+
+  try {
+    const url = APPS_SCRIPT_URL + '?payload=' + encodeURIComponent(JSON.stringify({ acao: 'listarCartelas' }));
+    const resp = await fetch(url, { method: 'GET' });
+    const dados = await resp.json();
+
+    if (!dados.sucesso) throw new Error(dados.mensagem || 'Erro desconhecido');
+
+    const lista = dados.cartelas || [];
+    if (!lista.length) {
+      grade.innerHTML = '<div class="estado-vazio"><div class="icon">📭</div><p>Nenhuma cartela encontrada na planilha.</p></div>';
+      return;
+    }
+
+    cartelas = lista.map(c => ({
+      id: c.id_cartela,
+      nome: c.comprador_nome || '',
+      telefone: c.comprador_telefone || '',
+      grade: typeof c.grade_json === 'string' ? JSON.parse(c.grade_json) : c.grade_json,
+      numeros: typeof c.numeros_json === 'string' ? JSON.parse(c.numeros_json) : c.numeros_json,
+      quinaJaAlertada: false,
+      cheiaJaAlertada: false,
+    }));
+
+    verificarCartelas();
+    atualizarContadores();
+  } catch(err) {
+    grade.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div><p>Erro ao carregar cartelas:<br><code style="font-size:12px">' + err.message + '</code></p></div>';
+  }
+}
+
+// ─── VERIFICAÇÃO ─────────────────────────────────────────────
+function modalidadesAtivas() {
+  return {
+    linha:    document.getElementById('mod-linha').checked,
+    diagonal: document.getElementById('mod-diagonal').checked,
+    cantos:   document.getElementById('mod-cantos').checked,
+  };
+}
+
+function verificarCartelas() {
+  const mod = modalidadesAtivas();
+
+  cartelas.forEach(cartela => {
+    // grade é array 5x5 com null no FREE
+    const grade = cartela.grade;
+    if (!grade) return;
+
+    // mapa de posições marcadas
+    const marcadas = [];
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const val = grade[r][c];
+        // FREE (null) = sempre marcado
+        marcadas.push(val === null || pedrasSorteadas.has(val));
+      }
+    }
+
+    const m = (r, c) => marcadas[r * 5 + c];
+
+    // Cartela cheia
+    const temCheia = marcadas.every(Boolean);
+
+    // Quina
+    let temQuina = false;
+
+    if (mod.linha) {
+      // linhas
+      for (let r = 0; r < 5; r++) {
+        if ([0,1,2,3,4].every(c => m(r,c))) { temQuina = true; break; }
+      }
+      // colunas
+      if (!temQuina) {
+        for (let c = 0; c < 5; c++) {
+          if ([0,1,2,3,4].every(r => m(r,c))) { temQuina = true; break; }
+        }
+      }
+    }
+
+    if (!temQuina && mod.diagonal) {
+      if ([0,1,2,3,4].every(i => m(i,i))) temQuina = true;
+      if ([0,1,2,3,4].every(i => m(i, 4-i))) temQuina = true;
+    }
+
+    if (!temQuina && mod.cantos) {
+      if (m(0,0) && m(0,4) && m(4,0) && m(4,4)) temQuina = true;
+    }
+
+    // Alertas
+    if (temCheia && !cartela.cheiaJaAlertada) {
+      cartela.cheiaJaAlertada = true;
+      cartela.quinaJaAlertada = true;
+      agendarAlerta(cartela, 'cheia');
+    } else if (temQuina && !cartela.quinaJaAlertada) {
+      cartela.quinaJaAlertada = true;
+      agendarAlerta(cartela, 'quina');
+    }
+
+    cartela._marcadas = marcadas;
+    cartela._temQuina = temQuina;
+    cartela._temCheia = temCheia;
+  });
+
+  renderizarCartelas();
+}
+
+// ─── RENDERIZAR CARTELAS ─────────────────────────────────────
+function renderizarCartelas() {
+  const grade = document.getElementById('grade');
+  const lista = filtroAtivo === 'quina'  ? cartelas.filter(c => c._temQuina && !c._temCheia)
+              : filtroAtivo === 'cheia'  ? cartelas.filter(c => c._temCheia)
+              : filtroAtivo === 'sem'    ? cartelas.filter(c => !c._temQuina && !c._temCheia)
+              : cartelas;
+
+  if (!cartelas.length) {
+    grade.innerHTML = '<div class="estado-vazio"><div class="icon">📋</div><p>Clique em "Carregar cartelas" para buscar do Google Sheets.</p></div>';
+    return;
+  }
+  if (!lista.length) {
+    grade.innerHTML = '<div class="estado-vazio"><div class="icon">🔍</div><p>Nenhuma cartela corresponde ao filtro.</p></div>';
+    return;
+  }
+  grade.innerHTML = lista.map(c => renderCartela(c)).join('');
+}
+
+function renderCartela(c) {
+  const grade = c.grade || [];
+  const marcadas = c._marcadas || [];
+
+  let celulas = '';
+  let idx = 0;
+  for (let r = 0; r < 5; r++) {
+    for (let col = 0; col < 5; col++) {
+      const val = grade[r] ? grade[r][col] : null;
+      const isFree = val === null;
+      const marcada = marcadas[idx] || false;
+      if (isFree) {
+        celulas += '<div class="celula free' + (marcada ? ' marcada' : '') + '">FREE</div>';
+      } else {
+        celulas += '<div class="celula' + (marcada ? ' marcada' : '') + '">' + (val !== undefined ? val : '') + '</div>';
+      }
+      idx++;
+    }
+  }
+
+  const badges = (c._temCheia ? '<span class="badge-cheia">CHEIA</span>' : '') +
+                 (c._temQuina && !c._temCheia ? '<span class="badge-quina">QUINA</span>' : '');
+  const classeExtra = c._temCheia ? 'cheia' : c._temQuina ? 'quina' : '';
+  const nomeDisplay = c.nome || 'Sem comprador';
+
+  return '<div class="cartela ' + classeExtra + '">' +
+    '<div class="cartela-header">' +
+      '<div>' +
+        '<div class="cartela-nome">' + nomeDisplay + '</div>' +
+        '<div class="cartela-id">#' + c.id + '</div>' +
+      '</div>' +
+      '<div class="cartela-badges">' + badges + '</div>' +
+    '</div>' +
+    '<div class="cartela-grid">' +
+      '<div class="header-col">B</div>' +
+      '<div class="header-col">I</div>' +
+      '<div class="header-col">N</div>' +
+      '<div class="header-col">G</div>' +
+      '<div class="header-col">O</div>' +
+      celulas +
+    '</div>' +
+  '</div>';
+}
+
+// ─── CONTADORES ──────────────────────────────────────────────
+function atualizarContadores() {
+  document.getElementById('cnt-cartelas').textContent = cartelas.length;
+  document.getElementById('cnt-quina').textContent = cartelas.filter(c => c._temQuina && !c._temCheia).length;
+  document.getElementById('cnt-cheia').textContent = cartelas.filter(c => c._temCheia).length;
+  document.getElementById('cnt-pedras').textContent = pedrasSorteadas.size;
+}
+
+// ─── FILTROS ─────────────────────────────────────────────────
+function filtrar(el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+  el.classList.add('ativo');
+  filtroAtivo = el.dataset.filtro;
+  renderizarCartelas();
+}
+
+// ─── ALERTAS ─────────────────────────────────────────────────
+function agendarAlerta(cartela, tipo) {
+  alertasFila.push({ cartela, tipo });
+  if (!alertandoAgora) mostrarProximoAlerta();
+}
+
+function mostrarProximoAlerta() {
+  if (!alertasFila.length) { alertandoAgora = false; return; }
+  alertandoAgora = true;
+  const { cartela, tipo } = alertasFila.shift();
+  const isCheia = tipo === 'cheia';
+
+  document.getElementById('modal-emoji').textContent = isCheia ? '🏆' : '⭐';
+  document.getElementById('modal-titulo').textContent = isCheia ? 'CARTELA CHEIA!' : 'QUINA!';
+  document.getElementById('modal-badge').textContent = isCheia ? 'Cartela Cheia' : 'Quina';
+  document.getElementById('modal-badge').className = 'tipo-badge ' + (isCheia ? 'tipo-cheia' : 'tipo-quina');
+  document.getElementById('modal-info').textContent =
+    '#' + cartela.id + (cartela.nome ? ' — ' + cartela.nome : ' — Sem comprador');
+
+  document.getElementById('overlay').classList.add('ativo');
+
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notas = isCheia ? [523,659,784,1047,1319] : [523,659,784];
+    notas.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.18 + 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.18 + 0.15);
+      osc.start(ctx.currentTime + i * 0.18);
+      osc.stop(ctx.currentTime + i * 0.18 + 0.2);
+    });
+  } catch(e) {}
+}
+
+function fecharModal() {
+  document.getElementById('overlay').classList.remove('ativo');
+  setTimeout(() => mostrarProximoAlerta(), 300);
+}
+
+// ─── LIMPAR ──────────────────────────────────────────────────
+function limparTudo() {
+  if (!confirm('Limpar todas as cartelas e pedras?')) return;
+  cartelas = [];
+  pedrasSorteadas.clear();
+  renderizarPedras(null);
+  renderizarCartelas();
+  atualizarContadores();
+}
+
+// ─── ENTER no input manual ───────────────────────────────────
+document.getElementById('pedra-manual').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adicionarPedraManual();
+});
+
+// ─── INIT ────────────────────────────────────────────────────
+iniciarCanal();
+atualizarContadores();
+renderizarPedras(null);
+</script>
+</body>
+</html>
