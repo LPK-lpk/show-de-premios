@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Paróquia SCJM — Patrocinadores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  :root {
+    --font-sans: 'Montserrat', 'Segoe UI Rounded', 'Arial Rounded MT Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --gold: #ffc400;
+    --blue: #0077d9;
+    --red: #df2418;
+    --outline: #111;
+    --soft-outline: #cfcfcf;
+    --shadow-main: #ffc400;
+    --shadow-alt: #df2418;
+    --shadow-soft: rgba(0,119,217,.55);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #fff; color: #fff; font-family: var(--font-sans);
+  }
+  body { display: flex; align-items: stretch; justify-content: stretch; }
+  .stage {
+    position: relative; width: 100vw; height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 7vh 7vw 6vh; isolation: isolate;
+    background: #fff;
+  }
+  .stage::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,.035) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(0,0,0,.035) 1px, transparent 1px);
+    background-size: 5vw 5vw;
+    pointer-events: none;
+  }
+  .stage::after {
+    content: ''; position: absolute; inset: 6vh 6vw;
+    border-top: 1px solid rgba(0,0,0,.08);
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    pointer-events: none;
+  }
+  .kicker {
+    font-size: clamp(18px, 2.3vh, 34px);
+    letter-spacing: .18em; text-transform: uppercase;
+    color: transparent; margin-bottom: 3vh; font-weight: 700;
+    opacity: 0; user-select: none;
+  }
+  .sponsor-card {
+    width: min(88vw, 1500px);
+    min-height: 54vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 2.3vh;
+  }
+  .name {
+    max-width: 100%;
+    font-size: clamp(64px, 12vh, 170px);
+    line-height: .95; font-weight: 900; color: #fff;
+    text-wrap: balance;
+    letter-spacing: .01em;
+    -webkit-text-stroke: clamp(2px, .5vh, 8px) var(--outline);
+    paint-order: stroke fill;
+    text-shadow:
+      .055em .055em 0 var(--shadow-main),
+      -.04em -.04em 0 var(--shadow-alt),
+      .09em -.035em 0 var(--shadow-soft),
+      0 .08em 0 rgba(0,0,0,.42),
+      0 .24em .28em rgba(0,0,0,.32);
+  }
+  .phone {
+    font-size: clamp(30px, 5vh, 76px);
+    color: #fff; font-weight: 900;
+    -webkit-text-stroke: clamp(1px, .22vh, 4px) var(--outline);
+    paint-order: stroke fill;
+    text-shadow:
+      .055em .055em 0 var(--shadow-alt),
+      -.038em -.038em 0 var(--shadow-main),
+      .078em -.028em 0 var(--shadow-soft),
+      0 .14em .22em rgba(0,0,0,.28);
+  }
+  .msg {
+    max-width: 82vw;
+    font-size: clamp(28px, 4.7vh, 72px);
+    color: #fff; line-height: 1.15; font-weight: 900;
+    text-wrap: balance;
+    -webkit-text-stroke: clamp(1px, .2vh, 4px) var(--outline);
+    paint-order: stroke fill;
+    text-shadow:
+      .052em .052em 0 var(--shadow-main),
+      -.034em -.034em 0 var(--shadow-alt),
+      .074em -.026em 0 var(--shadow-soft),
+      0 .13em .2em rgba(0,0,0,.26);
+  }
+  .num {
+    position: absolute; top: 7vh; left: 6vw;
+    min-width: 7vh; height: 7vh; padding: 0 2.4vh;
+    display: flex; align-items: center; justify-content: center;
+    border: none;
+    color: rgba(0,0,0,.11); font-size: 3vh; font-weight: 900;
+    -webkit-text-stroke: 1px rgba(0,0,0,.08);
+  }
+  .parish {
+    position: absolute; right: 6vw; bottom: 7vh;
+    font-size: clamp(18px, 2.4vh, 34px);
+    color: rgba(0,0,0,.16); text-align: right; font-weight: 800;
+  }
+  .progress {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 8px;
+    background: rgba(0,0,0,.045);
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--shadow-main), var(--shadow-alt));
+  }
+  .empty {
+    color: #fff; font-size: clamp(32px, 6vh, 86px); font-weight: 900;
+    text-align: center; line-height: 1.1;
+    -webkit-text-stroke: clamp(1px, .25vh, 4px) var(--soft-outline);
+    paint-order: stroke fill;
+  }
+  .sponsor-card.fx-rise { animation: sponsorRise .8s cubic-bezier(.18,.9,.22,1) both; }
+  .sponsor-card.fx-zoom { animation: sponsorZoom .82s cubic-bezier(.18,.9,.22,1) both; }
+  .sponsor-card.fx-left { animation: sponsorLeft .82s cubic-bezier(.18,.9,.22,1) both; }
+  .sponsor-card.fx-right { animation: sponsorRight .82s cubic-bezier(.18,.9,.22,1) both; }
+  .sponsor-card.fx-tilt { animation: sponsorTilt .86s cubic-bezier(.18,.9,.22,1) both; }
+  .sponsor-card.fx-blur { animation: sponsorBlur .86s cubic-bezier(.18,.9,.22,1) both; }
+  .sponsor-card.is-exiting { animation: sponsorExit .52s cubic-bezier(.55,0,.7,.2) both; }
+  @keyframes sponsorRise {
+    from { opacity: 0; transform: translateY(8vh) scale(.96); filter: blur(8px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+  @keyframes sponsorZoom {
+    from { opacity: 0; transform: scale(.74); filter: blur(10px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes sponsorLeft {
+    from { opacity: 0; transform: translateX(-12vw) rotate(-2deg); filter: blur(8px); }
+    to { opacity: 1; transform: translateX(0) rotate(0); filter: blur(0); }
+  }
+  @keyframes sponsorRight {
+    from { opacity: 0; transform: translateX(12vw) rotate(2deg); filter: blur(8px); }
+    to { opacity: 1; transform: translateX(0) rotate(0); filter: blur(0); }
+  }
+  @keyframes sponsorTilt {
+    from { opacity: 0; transform: perspective(900px) rotateX(16deg) translateY(-4vh) scale(.94); filter: blur(8px); }
+    to { opacity: 1; transform: perspective(900px) rotateX(0) translateY(0) scale(1); filter: blur(0); }
+  }
+  @keyframes sponsorBlur {
+    from { opacity: 0; transform: scale(1.12); filter: blur(16px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes sponsorExit {
+    from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    to { opacity: 0; transform: translateY(-7vh) scale(.96); filter: blur(10px); }
+  }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <div class="num" id="sponsorNum"></div>
+    <div class="kicker">Patrocinador</div>
+    <section class="sponsor-card" id="card">
+      <div class="empty" id="emptyMsg">Carregando patrocinadores...</div>
+      <div class="name" id="sponsorName" style="display:none"></div>
+      <div class="phone" id="sponsorPhone"></div>
+      <div class="msg" id="sponsorMsg"></div>
+    </section>
+    <div class="parish">Paróquia Sagrado Coração de Jesus<br>Marília - SP</div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  </main>
+
+<script>
+  const SLIDE_MS = 20000;
+  const SHADOW_THEMES = [
+    { main: '#ffc400', alt: '#df2418', soft: 'rgba(0,119,217,.62)' },
+    { main: '#0077d9', alt: '#ffc400', soft: 'rgba(223,36,24,.58)' },
+    { main: '#df2418', alt: '#0077d9', soft: 'rgba(255,196,0,.66)' },
+    { main: '#ffc400', alt: '#0077d9', soft: 'rgba(223,36,24,.58)' },
+    { main: '#0077d9', alt: '#df2418', soft: 'rgba(255,196,0,.66)' },
+    { main: '#df2418', alt: '#ffc400', soft: 'rgba(0,119,217,.62)' }
+  ];
+  const ANIMATION_CLASSES = ['fx-rise', 'fx-zoom', 'fx-left', 'fx-right', 'fx-tilt', 'fx-blur'];
+  let rows = [];
+  let index = 0;
+  let timer = null;
+  let progressTimer = null;
+  let exitTimer = null;
+  let slideStartedAt = Date.now();
+
+  function sponsorLabel(num) {
+    return Number(num) === 0 ? 'Coringa' : String(num);
+  }
+
+  function renderEmpty() {
+    document.getElementById('sponsorNum').textContent = '';
+    document.getElementById('emptyMsg').style.display = '';
+    document.getElementById('emptyMsg').textContent = 'Nenhum patrocinador carregado';
+    document.getElementById('sponsorName').style.display = 'none';
+    document.getElementById('sponsorName').textContent = '';
+    document.getElementById('sponsorPhone').textContent = '';
+    document.getElementById('sponsorMsg').textContent = '';
+    document.getElementById('progressFill').style.width = '0%';
+  }
+
+  function renderCurrent() {
+    if (!rows.length) {
+      renderEmpty();
+      return;
+    }
+    if (index >= rows.length) index = 0;
+    const sponsor = rows[index];
+    const theme = SHADOW_THEMES[index % SHADOW_THEMES.length];
+    document.documentElement.style.setProperty('--shadow-main', theme.main);
+    document.documentElement.style.setProperty('--shadow-alt', theme.alt);
+    document.documentElement.style.setProperty('--shadow-soft', theme.soft);
+    const card = document.getElementById('card');
+    card.classList.remove('is-exiting', ...ANIMATION_CLASSES);
+    void card.offsetWidth;
+    card.classList.add(ANIMATION_CLASSES[index % ANIMATION_CLASSES.length]);
+    document.getElementById('emptyMsg').style.display = 'none';
+    document.getElementById('sponsorName').style.display = '';
+    document.getElementById('sponsorNum').textContent = sponsorLabel(sponsor.num);
+    document.getElementById('sponsorName').textContent = sponsor.name || '';
+    document.getElementById('sponsorPhone').textContent = sponsor.phone || '';
+    document.getElementById('sponsorMsg').textContent = sponsor.msg || '';
+    slideStartedAt = Date.now();
+    document.getElementById('progressFill').style.width = '0%';
+  }
+
+  function advanceSlide(delta = 1) {
+    if (!rows.length) return;
+    const card = document.getElementById('card');
+    card.classList.remove(...ANIMATION_CLASSES);
+    card.classList.add('is-exiting');
+    clearTimeout(exitTimer);
+    exitTimer = setTimeout(() => {
+      index = (index + delta + rows.length) % rows.length;
+      renderCurrent();
+    }, 520);
+  }
+
+  function startLoop() {
+    clearInterval(timer);
+    clearInterval(progressTimer);
+    clearTimeout(exitTimer);
+    renderCurrent();
+    if (rows.length > 1) {
+      timer = setInterval(() => advanceSlide(1), SLIDE_MS);
+      progressTimer = setInterval(() => {
+        const pct = Math.min(100, ((Date.now() - slideStartedAt) / SLIDE_MS) * 100);
+        document.getElementById('progressFill').style.width = pct + '%';
+      }, 250);
+    }
+  }
+
+  window.sponsorInit = function(nextRows) {
+    rows = Array.isArray(nextRows) ? nextRows.filter(item => item && item.name) : [];
+    index = 0;
+    startLoop();
+  };
+
+  window.sponsorUpdate = function(nextRows) {
+    const current = rows[index] && rows[index].num;
+    rows = Array.isArray(nextRows) ? nextRows.filter(item => item && item.name) : [];
+    const sameIndex = rows.findIndex(item => item.num === current);
+    index = sameIndex >= 0 ? sameIndex : 0;
+    startLoop();
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    }
+    if (e.key === 'ArrowRight' && rows.length) {
+      advanceSlide(1);
+    }
+    if (e.key === 'ArrowLeft' && rows.length) {
+      advanceSlide(-1);
+    }
+  });
+
+  // ─── BroadcastChannel ────────────────────────────────
+  const _canalSponsor = new BroadcastChannel('bingo-canal');
+  _canalSponsor.onmessage = function(e) {
+    const d = e.data;
+    if (!d) return;
+    if (d.tipo === 'sponsors' && typeof window.sponsorInit === 'function') {
+      window.sponsorInit(d.payload);
+    }
+  };
+</script>
+</body>
+</html>
