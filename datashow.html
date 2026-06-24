@@ -7,60 +7,69 @@
 <style>
   :root { --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: #000; font-family: var(--font-sans); color: #fff;
-    height: 100%; overflow: hidden;
-  }
+  html, body { background: #000; font-family: var(--font-sans); color: #fff; height: 100%; overflow: hidden; }
   body { display: flex; flex-direction: column; padding: 2.2vh 2.5vw; gap: 1.6vh; }
 
   .parish-header-proj {
     display: flex; flex-direction: row; align-items: center; justify-content: center;
     gap: 2vw; flex-shrink: 0;
   }
-  .parish-logo-proj { height: 12vh; width: auto; object-fit: contain; }
-  .parish-name-proj { display: flex; flex-direction: column; font-family: var(--font-sans); }
+  .parish-name-proj { display: flex; flex-direction: column; }
   .parish-name-proj .p-title-proj { font-size: 5.6vh; font-weight: 700; color: #e9d8a6; line-height: 1.2; }
   .parish-name-proj .p-sub-proj   { font-size: 2.8vh; color: #888; letter-spacing: 0.05em; }
 
   .main-area { flex: 1; display: flex; gap: 2.2vw; min-height: 0; }
 
+  /* ── Coluna esquerda (número sorteado) ── */
   .left-col {
     flex: 0 0 38%; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 1.4vh;
-    padding: 2vh 1.6vw; overflow: hidden;
+    padding: 2vh 1.6vw; overflow: hidden; position: relative;
   }
   .big-display { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5vh; flex-shrink: 0; }
   .big-letter  { font-size: 6vh; font-weight: 600; letter-spacing: 0.1em; color: #2a2a2a; transition: color 0.3s; }
   .big-number  { font-size: 38vh; font-weight: 700; line-height: 1; color: #2a2a2a; transition: color 0.3s; font-variant-numeric: tabular-nums; }
-  .big-display.live .big-letter  { color: var(--bd-color, #fff); opacity: .8; }
-  .big-display.live .big-number  { color: var(--bd-color, #fff); }
+  .big-display.live .big-letter { color: var(--bd-color, #fff); opacity: .8; }
+  .big-display.live .big-number { color: var(--bd-color, #fff); }
   .big-number.pop { animation: bigpop 0.3s ease-out; }
   @keyframes bigpop { 0%{transform:scale(1)} 45%{transform:scale(1.12)} 100%{transform:scale(1)} }
 
   .status-line { font-size: 2vh; color: #555; text-align: center; margin-top: 1vh; flex-shrink: 0; }
   .status-line strong { color: #ccc; font-weight: 600; }
 
+  /* banner patrocinador */
   .left-sponsor {
     width: 100%; max-height: 0; overflow: hidden; margin-top: 0;
     text-align: center; border-top: 2px solid transparent;
-    transition: max-height 0.4s cubic-bezier(.34,1.1,.64,1), margin-top 0.4s ease, padding 0.4s ease, border-color 0.4s ease;
+    transition: max-height 0.4s cubic-bezier(.34,1.1,.64,1), margin-top 0.4s, padding 0.4s, border-color 0.4s;
   }
-  .left-sponsor.show {
-    max-height: 38vh; margin-top: 2vh; padding-top: 1.8vh; border-top-color: #fbbf24;
-  }
-  .left-sponsor-icon { font-size: 5.2vh; color: #fbbf24; }
+  .left-sponsor.show { max-height: 38vh; margin-top: 2vh; padding-top: 1.8vh; border-top-color: #fbbf24; }
+  .left-sponsor-icon  { font-size: 5.2vh; color: #fbbf24; }
   .left-sponsor-name  { font-size: 6.8vh; font-weight: 700; color: #fff; line-height: 1.15; margin-top: 0.6vh; }
   .left-sponsor-phone { font-size: 3vh; color: #fbbf24; font-weight: 600; margin-top: 0.5vh; }
   .left-sponsor-msg   { font-size: 4vh; color: #d4c98a; margin-top: 0.4vh; }
 
-  .right-col { flex: 1; display: flex; flex-direction: column; gap: 1.4vh; min-width: 0; }
-
-  .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5vh; flex: 1; min-height: 0; }
-  .col-hdr {
-    display: flex; align-items: center; justify-content: center;
-    font-size: 3.4vh; font-weight: 700; border-radius: 0.8vh; background: #111;
+  /* ── Overlay sorteio de cartela ── */
+  .cartela-overlay {
+    display: none; position: absolute; inset: 0;
+    background: #000; border-radius: 1.4vh;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 2vh; padding: 3vh; text-align: center; z-index: 10;
+    animation: fadeIn .5s ease both;
   }
+  .cartela-overlay.show { display: flex; }
+  @keyframes fadeIn { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+  .cartela-label  { font-size: 2.8vh; color: #fbbf24; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .cartela-numero { font-size: 28vh; font-weight: 900; line-height: 1; color: #fbbf24;
+    text-shadow: 0 0 6vh rgba(255,196,0,.4), 0 .08em 0 rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+  .cartela-nome   { font-size: 6vh; font-weight: 700; color: #fff; line-height: 1.2; text-wrap: balance; }
+  .cartela-sub    { font-size: 2.4vh; color: #555; }
+
+  /* ── Coluna direita (tabela bingo) ── */
+  .right-col { flex: 1; display: flex; flex-direction: column; gap: 1.4vh; min-width: 0; }
+  .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5vh; flex: 1; min-height: 0; }
+  .col-hdr { display: flex; align-items: center; justify-content: center; font-size: 3.4vh; font-weight: 700; border-radius: 0.8vh; background: #111; }
   .nc {
     display: flex; align-items: center; justify-content: center;
     font-size: 2.1vh; font-weight: 600;
@@ -90,22 +99,32 @@
 
   <div class="main-area">
     <div class="left-col">
+      <!-- Número sorteado (bingo normal) -->
       <div class="big-display" id="bigDisplay">
         <span class="big-letter" id="bigLtr"></span>
         <span class="big-number" id="bigNum"></span>
       </div>
       <div class="status-line" id="statusLine">Aguardando o primeiro número…</div>
 
+      <!-- Banner patrocinador -->
       <div class="left-sponsor" id="sponsorBanner">
-        <i class="ti ti-star-filled left-sponsor-icon" aria-hidden="true"></i>
+        <i class="ti ti-star-filled left-sponsor-icon"></i>
         <div class="left-sponsor-name"  id="sponsorName">—</div>
         <div class="left-sponsor-phone" id="sponsorPhone"></div>
         <div class="left-sponsor-msg"   id="sponsorMsg"></div>
       </div>
+
+      <!-- Overlay sorteio de cartela -->
+      <div class="cartela-overlay" id="cartelaOverlay">
+        <div class="cartela-label">🎉 Cartela Sorteada!</div>
+        <div class="cartela-numero" id="cartelaNumero">—</div>
+        <div class="cartela-nome"   id="cartelaNome"></div>
+        <div class="cartela-sub"    id="cartelaSub"></div>
+      </div>
     </div>
 
     <div class="right-col">
-      <div class="board" id="board"></div>
+      <div class="board"     id="board"></div>
       <div class="hist-wrap" id="histWrap" style="display:none">
         <div class="hist-lbl">Histórico</div>
         <div class="chips" id="chips"></div>
@@ -123,9 +142,9 @@
     { l:'G', s:46, e:60, hex:'#b45309', hdr:'#fbbf24' },
     { l:'O', s:61, e:75, hex:'#7e22ce', hdr:'#c084fc' },
   ];
-
   var called = new Set();
   var hist   = [];
+  var cartelaTimer = null;
 
   function colOf(n) { return COLS.find(function(c){ return n >= c.s && n <= c.e; }); }
 
@@ -139,7 +158,7 @@
     });
     for (var row = 0; row < 15; row++) {
       COLS.forEach(function(c) {
-        var n  = c.s + row;
+        var n = c.s + row;
         var el = document.createElement('div');
         el.className = 'nc'; el.id = 'pn' + n; el.textContent = n;
         b.appendChild(el);
@@ -152,8 +171,7 @@
       el.classList.remove('hit','latest'); el.style.background = '';
     });
     called.forEach(function(n) {
-      var col  = colOf(n);
-      var cell = document.getElementById('pn' + n);
+      var col = colOf(n); var cell = document.getElementById('pn' + n);
       if (cell) { cell.classList.add('hit'); cell.style.background = col.hex; }
     });
     if (hist.length) {
@@ -178,14 +196,10 @@
 
   function updateStatus() {
     var count = called.size; var rem = 75 - count;
-    var status = document.getElementById('statusLine');
-    if (!hist.length) {
-      status.innerHTML = 'Aguardando o primeiro número…';
-    } else if (rem === 0) {
-      status.innerHTML = '<strong>Todos os 75 números sorteados!</strong>';
-    } else {
-      status.innerHTML = 'Sorteados: <strong>' + count + '</strong> &nbsp;·&nbsp; Restam: <strong>' + rem + '</strong>';
-    }
+    var s = document.getElementById('statusLine');
+    if (!hist.length) s.innerHTML = 'Aguardando o primeiro número…';
+    else if (rem === 0) s.innerHTML = '<strong>Todos os 75 números sorteados!</strong>';
+    else s.innerHTML = 'Sorteados: <strong>' + count + '</strong> &nbsp;·&nbsp; Restam: <strong>' + rem + '</strong>';
   }
 
   function updateHistory() {
@@ -193,8 +207,7 @@
     chips.innerHTML = '';
     document.getElementById('histWrap').style.display = hist.length ? '' : 'none';
     hist.slice(0,18).forEach(function(num, i) {
-      var c  = colOf(num);
-      var ch = document.createElement('div');
+      var c = colOf(num); var ch = document.createElement('div');
       ch.className = 'chip';
       ch.style.background = i === 0 ? c.hex : c.hex + 'aa';
       ch.textContent = c.l + '-' + num;
@@ -211,37 +224,66 @@
     banner.classList.add('show');
   }
 
-  /* BroadcastChannel */
+  /* ── Overlay sorteio de cartela ── */
+  function mostrarCartela(cartela, duracaoMs) {
+    clearTimeout(cartelaTimer);
+    document.getElementById('cartelaNumero').textContent = '#' + cartela.id;
+    document.getElementById('cartelaNome').textContent   = cartela.nome || '';
+    document.getElementById('cartelaSub').textContent    =
+      cartela.restantes !== undefined ? cartela.restantes + ' cartelas restantes' : '';
+
+    var overlay = document.getElementById('cartelaOverlay');
+    overlay.classList.remove('show');
+    void overlay.offsetWidth;
+    overlay.classList.add('show');
+
+    // Oculta automaticamente após duração (padrão 15s)
+    cartelaTimer = setTimeout(function() {
+      overlay.classList.remove('show');
+    }, duracaoMs || 15000);
+  }
+
+  function ocultarCartela() {
+    clearTimeout(cartelaTimer);
+    document.getElementById('cartelaOverlay').classList.remove('show');
+  }
+
+  /* ── BroadcastChannel ── */
   var canal = new BroadcastChannel('bingo-canal');
   canal.onmessage = function(e) {
     var d = e.data;
     if (!d) return;
 
     if (d.tipo === 'draw') {
-      called = new Set(d.payload.called);
-      hist   = d.payload.hist;
+      ocultarCartela();
+      called = new Set(d.payload.called); hist = d.payload.hist;
       paintBoard(); setBig(d.payload.num, true); updateStatus(); updateHistory();
       showSponsor(d.payload.sponsor || null);
     }
-
     if (d.tipo === 'undo') {
-      called = new Set(d.payload.called);
-      hist   = d.payload.hist;
+      ocultarCartela();
+      called = new Set(d.payload.called); hist = d.payload.hist;
       paintBoard();
       if (hist.length) { setBig(hist[0], false); showSponsor(d.payload.sponsor || null); }
       else { setBig(null, false); showSponsor(null); }
       updateStatus(); updateHistory();
     }
-
     if (d.tipo === 'resetar') {
+      ocultarCartela();
       called.clear(); hist = [];
       buildBoard(); updateStatus(); updateHistory();
       setBig(null, false); showSponsor(null);
     }
-
     if (d.tipo === 'sponsor') {
       if (hist.length && hist[0] === d.payload.num)
         showSponsor(d.payload.sponsor || null);
+    }
+    // ── Sorteio de cartela ──
+    if (d.tipo === 'sorteio_cartela') {
+      mostrarCartela(d.payload.cartela, d.payload.duracao || 15000);
+    }
+    if (d.tipo === 'ocultar_cartela') {
+      ocultarCartela();
     }
   };
 
@@ -251,6 +293,7 @@
       if (!document.fullscreenElement)
         document.documentElement.requestFullscreen().catch(function(){});
     }
+    if (e.key === 'Escape') ocultarCartela();
   });
 
   buildBoard();
