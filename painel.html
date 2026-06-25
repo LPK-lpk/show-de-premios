@@ -834,18 +834,35 @@ async function confirmarResetSorteios(){
 /* ══════════════════════════════════════════════════════════
    PATROCINADORES
 ══════════════════════════════════════════════════════════ */
-async function carregarPatrocinadores(){
-  try{
-    const url=SCRIPT_PATROC+'?acao=listarPatrocinios&_='+Date.now();
-    const r=await fetch(url); const data=await r.json();
-    if(data.sucesso && Array.isArray(data.patrocinios)){
-      sponsors=data.patrocinios;
-      ls(LS_SPONSORS,JSON.stringify(sponsors));
-      renderSponsorList();
-    }
-  }catch(e){ console.warn('Erro ao carregar patrocinadores:',e); }
-}
+function carregarPatrocinadores(){
+  return new Promise(function(resolve){
+    var cbName = '_bingo_patroc_' + Date.now();
+    var script = document.createElement('script');
 
+    window[cbName] = function(data){
+      delete window[cbName];
+      if(script.parentNode) script.parentNode.removeChild(script);
+      if(data.sucesso && Array.isArray(data.patrocinios)){
+        sponsors = data.patrocinios;
+        ls(LS_SPONSORS, JSON.stringify(sponsors));
+        renderSponsorList();
+      } else {
+        console.warn('Patrocinadores: resposta inválida', data);
+      }
+      resolve();
+    };
+
+    script.onerror = function(){
+      delete window[cbName];
+      if(script.parentNode) script.parentNode.removeChild(script);
+      console.warn('Erro ao carregar patrocinadores via JSONP');
+      resolve();
+    };
+
+    script.src = SCRIPT_PATROC + '?acao=listarPatrocinios&callback=' + cbName + '&_=' + Date.now();
+    document.head.appendChild(script);
+  });
+}
 function renderSponsorList(){
   const el=document.getElementById('sponsorList');
   if(!sponsors.length){ el.innerHTML='<div style="color:#555;font-size:12px">Nenhum patrocinador carregado.</div>'; return; }
@@ -857,7 +874,6 @@ function renderSponsorList(){
     </div>
   `).join('');
 }
-
 function enviarPatrocinadores(){
   if(!sponsors.length){ fb('fbPatroc','warn','Carregue os patrocinadores primeiro.'); return; }
   CANAL.postMessage({ tipo:'sponsors', payload:sponsors });
