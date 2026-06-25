@@ -213,8 +213,6 @@
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz44Q1ZSeA9xx1amYMImDtsr6a5rV1ol7A5crvXm01L-T0pdW3PhHTo4_BnFiOlLUxtcQ/exec';
 const CANAL_NOME = 'bingo-canal';
-const FREE_ROW = 2;
-const FREE_COL = 2;
 
 let pedrasSorteadas = new Set();
 let cartelas = [];
@@ -227,10 +225,32 @@ let canal;
 function iniciarCanal() {
   try {
     canal = new BroadcastChannel(CANAL_NOME);
-    canal.onmessage = (e) => {
-      const d = e.data;
-      if (d && d.tipo === 'pedra' && typeof d.numero === 'number') registrarPedra(d.numero, true);
-      if (d && d.tipo === 'resetar') resetarPedras();
+    canal.onmessage = function(e) {
+      var d = e.data;
+      if (!d) return;
+
+      // Painel envia tipo='draw' com payload.called (array de pedras) e payload.num (último número)
+      if (d.tipo === 'draw') {
+        var novas = (d.payload && d.payload.called) ? d.payload.called : [];
+        novas.forEach(function(n) { pedrasSorteadas.add(n); });
+        var novoNum = d.payload && d.payload.num;
+        renderizarPedras(novoNum || null);
+        verificarCartelas();
+        atualizarContadores();
+      }
+
+      if (d.tipo === 'undo') {
+        var novas = (d.payload && d.payload.called) ? d.payload.called : [];
+        pedrasSorteadas = new Set(novas);
+        recalcularAlertas();
+        renderizarPedras(null);
+        verificarCartelas();
+        atualizarContadores();
+      }
+
+      if (d.tipo === 'resetar') {
+        resetarPedras();
+      }
     };
     document.getElementById('dot-canal').classList.add('ativo');
     document.getElementById('txt-canal').textContent = 'Canal "' + CANAL_NOME + '" ativo';
@@ -240,7 +260,7 @@ function iniciarCanal() {
 }
 
 // ─── PEDRAS ──────────────────────────────────────────────────
-function registrarPedra(num, animada = false) {
+function registrarPedra(num, animada) {
   if (num < 1 || num > 75) return;
   if (pedrasSorteadas.has(num)) return;
   pedrasSorteadas.add(num);
@@ -250,21 +270,19 @@ function registrarPedra(num, animada = false) {
 }
 
 function adicionarPedraManual() {
-  const inp = document.getElementById('pedra-manual');
-  const n = parseInt(inp.value);
+  var inp = document.getElementById('pedra-manual');
+  var n = parseInt(inp.value);
   if (isNaN(n) || n < 1 || n > 75) {
-    inp.focus();
-    inp.style.borderColor = 'red';
-    setTimeout(() => inp.style.borderColor = '', 1200);
+    inp.focus(); inp.style.borderColor = 'red';
+    setTimeout(function(){ inp.style.borderColor = ''; }, 1200);
     return;
   }
   registrarPedra(n, true);
-  inp.value = '';
-  inp.focus();
+  inp.value = ''; inp.focus();
 }
 
 function removerUltimaPedra() {
-  const arr = [...pedrasSorteadas];
+  var arr = Array.from(pedrasSorteadas);
   if (!arr.length) return;
   pedrasSorteadas.delete(arr[arr.length - 1]);
   renderizarPedras(null);
@@ -274,65 +292,80 @@ function removerUltimaPedra() {
 }
 
 function resetarPedras() {
-  if (!confirm('Resetar todas as pedras desta rodada?')) return;
+  if (pedrasSorteadas.size > 0 && !confirm('Resetar todas as pedras desta rodada?')) return;
   pedrasSorteadas.clear();
-  cartelas.forEach(c => { c.quinaJaAlertada = false; c.cheiaJaAlertada = false; });
+  cartelas.forEach(function(c){ c.quinaJaAlertada = false; c.cheiaJaAlertada = false; });
   renderizarPedras(null);
   verificarCartelas();
   atualizarContadores();
 }
 
 function recalcularAlertas() {
-  cartelas.forEach(c => { c.quinaJaAlertada = false; c.cheiaJaAlertada = false; });
+  cartelas.forEach(function(c){ c.quinaJaAlertada = false; c.cheiaJaAlertada = false; });
 }
 
 function renderizarPedras(novaNum) {
-  const lista = document.getElementById('pedras-lista');
-  const arr = [...pedrasSorteadas].sort((a,b) => a - b);
+  var lista = document.getElementById('pedras-lista');
+  var arr = Array.from(pedrasSorteadas).sort(function(a,b){ return a-b; });
   if (!arr.length) {
     lista.innerHTML = '<span style="color:rgba(255,255,255,.4); font-size:12px;">Aguardando sorteio…</span>';
     document.getElementById('total-pedras').textContent = '0 pedras';
     return;
   }
-  lista.innerHTML = arr.map(n =>
-    '<span class="pedra-badge' + (n === novaNum ? ' nova' : '') + '">' + n + '</span>'
-  ).join('');
+  lista.innerHTML = arr.map(function(n){
+    return '<span class="pedra-badge' + (n === novaNum ? ' nova' : '') + '">' + n + '</span>';
+  }).join('');
   document.getElementById('total-pedras').textContent = arr.length + ' pedra' + (arr.length !== 1 ? 's' : '');
 }
 
-// ─── CARREGAR CARTELAS DO SHEETS ─────────────────────────────
-async function carregarCartelas() {
-  const grade = document.getElementById('grade');
+// ─── CARREGAR CARTELAS VIA JSONP ─────────────────────────────
+function carregarCartelas() {
+  var grade = document.getElementById('grade');
   grade.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando cartelas do Google Sheets…</div>';
 
-  try {
-    const url = APPS_SCRIPT_URL + '?payload=' + encodeURIComponent(JSON.stringify({ acao: 'listarCartelas' }));
-    const resp = await fetch(url, { method: 'GET' });
-    const dados = await resp.json();
+  var cbName = '_ver_cartelas_' + Date.now();
+  var script = document.createElement('script');
 
-    if (!dados.sucesso) throw new Error(dados.mensagem || 'Erro desconhecido');
+  window[cbName] = function(dados) {
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
 
-    const lista = dados.cartelas || [];
+    if (!dados.sucesso) {
+      grade.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div><p>Erro: ' + (dados.mensagem || 'Erro desconhecido') + '</p></div>';
+      return;
+    }
+
+    var lista = dados.cartelas || [];
     if (!lista.length) {
       grade.innerHTML = '<div class="estado-vazio"><div class="icon">📭</div><p>Nenhuma cartela encontrada na planilha.</p></div>';
       return;
     }
 
-    cartelas = lista.map(c => ({
-      id: c.id_cartela,
-      nome: c.comprador_nome || '',
-      telefone: c.comprador_telefone || '',
-      grade: typeof c.grade_json === 'string' ? JSON.parse(c.grade_json) : c.grade_json,
-      numeros: typeof c.numeros_json === 'string' ? JSON.parse(c.numeros_json) : c.numeros_json,
-      quinaJaAlertada: false,
-      cheiaJaAlertada: false,
-    }));
+    cartelas = lista.map(function(c) {
+      return {
+        id:               c.id_cartela,
+        nome:             c.comprador_nome || '',
+        telefone:         c.comprador_telefone || '',
+        grade:            typeof c.grade_json === 'string' ? JSON.parse(c.grade_json) : c.grade_json,
+        numeros:          typeof c.numeros_json === 'string' ? JSON.parse(c.numeros_json) : c.numeros_json,
+        quinaJaAlertada:  false,
+        cheiaJaAlertada:  false,
+      };
+    });
 
     verificarCartelas();
     atualizarContadores();
-  } catch(err) {
-    grade.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div><p>Erro ao carregar cartelas:<br><code style="font-size:12px">' + err.message + '</code></p></div>';
-  }
+  };
+
+  script.onerror = function() {
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+    grade.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div><p>Erro ao carregar cartelas. Verifique a conexão.</p></div>';
+  };
+
+  var payload = encodeURIComponent(JSON.stringify({ acao: 'listarCartelas' }));
+  script.src = APPS_SCRIPT_URL + '?payload=' + payload + '&callback=' + cbName + '&_=' + Date.now();
+  document.head.appendChild(script);
 }
 
 // ─── VERIFICAÇÃO ─────────────────────────────────────────────
@@ -345,54 +378,45 @@ function modalidadesAtivas() {
 }
 
 function verificarCartelas() {
-  const mod = modalidadesAtivas();
+  var mod = modalidadesAtivas();
 
-  cartelas.forEach(cartela => {
-    // grade é array 5x5 com null no FREE
-    const grade = cartela.grade;
+  cartelas.forEach(function(cartela) {
+    var grade = cartela.grade;
     if (!grade) return;
 
-    // mapa de posições marcadas
-    const marcadas = [];
-    for (let r = 0; r < 5; r++) {
-      for (let c = 0; c < 5; c++) {
-        const val = grade[r][c];
-        // FREE (null) = sempre marcado
+    var marcadas = [];
+    for (var r = 0; r < 5; r++) {
+      for (var c = 0; c < 5; c++) {
+        var val = grade[r][c];
         marcadas.push(val === null || pedrasSorteadas.has(val));
       }
     }
 
-    const m = (r, c) => marcadas[r * 5 + c];
+    var m = function(r, c){ return marcadas[r * 5 + c]; };
 
-    // Cartela cheia
-    const temCheia = marcadas.every(Boolean);
-
-    // Quina
-    let temQuina = false;
+    var temCheia = marcadas.every(Boolean);
+    var temQuina = false;
 
     if (mod.linha) {
-      // linhas
-      for (let r = 0; r < 5; r++) {
-        if ([0,1,2,3,4].every(c => m(r,c))) { temQuina = true; break; }
+      for (var r = 0; r < 5; r++) {
+        if ([0,1,2,3,4].every(function(c){ return m(r,c); })) { temQuina = true; break; }
       }
-      // colunas
       if (!temQuina) {
-        for (let c = 0; c < 5; c++) {
-          if ([0,1,2,3,4].every(r => m(r,c))) { temQuina = true; break; }
+        for (var c = 0; c < 5; c++) {
+          if ([0,1,2,3,4].every(function(r){ return m(r,c); })) { temQuina = true; break; }
         }
       }
     }
 
     if (!temQuina && mod.diagonal) {
-      if ([0,1,2,3,4].every(i => m(i,i))) temQuina = true;
-      if ([0,1,2,3,4].every(i => m(i, 4-i))) temQuina = true;
+      if ([0,1,2,3,4].every(function(i){ return m(i,i); })) temQuina = true;
+      if ([0,1,2,3,4].every(function(i){ return m(i, 4-i); })) temQuina = true;
     }
 
     if (!temQuina && mod.cantos) {
       if (m(0,0) && m(0,4) && m(4,0) && m(4,4)) temQuina = true;
     }
 
-    // Alertas
     if (temCheia && !cartela.cheiaJaAlertada) {
       cartela.cheiaJaAlertada = true;
       cartela.quinaJaAlertada = true;
@@ -410,36 +434,36 @@ function verificarCartelas() {
   renderizarCartelas();
 }
 
-// ─── RENDERIZAR CARTELAS ─────────────────────────────────────
+// ─── RENDERIZAR ───────────────────────────────────────────────
 function renderizarCartelas() {
-  const grade = document.getElementById('grade');
-  const lista = filtroAtivo === 'quina'  ? cartelas.filter(c => c._temQuina && !c._temCheia)
-              : filtroAtivo === 'cheia'  ? cartelas.filter(c => c._temCheia)
-              : filtroAtivo === 'sem'    ? cartelas.filter(c => !c._temQuina && !c._temCheia)
-              : cartelas;
+  var gradeEl = document.getElementById('grade');
+  var lista = filtroAtivo === 'quina' ? cartelas.filter(function(c){ return c._temQuina && !c._temCheia; })
+            : filtroAtivo === 'cheia' ? cartelas.filter(function(c){ return c._temCheia; })
+            : filtroAtivo === 'sem'   ? cartelas.filter(function(c){ return !c._temQuina && !c._temCheia; })
+            : cartelas;
 
   if (!cartelas.length) {
-    grade.innerHTML = '<div class="estado-vazio"><div class="icon">📋</div><p>Clique em "Carregar cartelas" para buscar do Google Sheets.</p></div>';
+    gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">📋</div><p>Clique em "Carregar cartelas" para buscar do Google Sheets.</p></div>';
     return;
   }
   if (!lista.length) {
-    grade.innerHTML = '<div class="estado-vazio"><div class="icon">🔍</div><p>Nenhuma cartela corresponde ao filtro.</p></div>';
+    gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">🔍</div><p>Nenhuma cartela corresponde ao filtro.</p></div>';
     return;
   }
-  grade.innerHTML = lista.map(c => renderCartela(c)).join('');
+  gradeEl.innerHTML = lista.map(function(c){ return renderCartela(c); }).join('');
 }
 
 function renderCartela(c) {
-  const grade = c.grade || [];
-  const marcadas = c._marcadas || [];
+  var grade = c.grade || [];
+  var marcadas = c._marcadas || [];
+  var celulas = '';
+  var idx = 0;
 
-  let celulas = '';
-  let idx = 0;
-  for (let r = 0; r < 5; r++) {
-    for (let col = 0; col < 5; col++) {
-      const val = grade[r] ? grade[r][col] : null;
-      const isFree = val === null;
-      const marcada = marcadas[idx] || false;
+  for (var r = 0; r < 5; r++) {
+    for (var col = 0; col < 5; col++) {
+      var val = grade[r] ? grade[r][col] : null;
+      var isFree = val === null;
+      var marcada = marcadas[idx] || false;
       if (isFree) {
         celulas += '<div class="celula free' + (marcada ? ' marcada' : '') + '">FREE</div>';
       } else {
@@ -449,15 +473,14 @@ function renderCartela(c) {
     }
   }
 
-  const badges = (c._temCheia ? '<span class="badge-cheia">CHEIA</span>' : '') +
-                 (c._temQuina && !c._temCheia ? '<span class="badge-quina">QUINA</span>' : '');
-  const classeExtra = c._temCheia ? 'cheia' : c._temQuina ? 'quina' : '';
-  const nomeDisplay = c.nome || 'Sem comprador';
+  var badges = (c._temCheia ? '<span class="badge-cheia">CHEIA</span>' : '') +
+               (c._temQuina && !c._temCheia ? '<span class="badge-quina">QUINA</span>' : '');
+  var classeExtra = c._temCheia ? 'cheia' : c._temQuina ? 'quina' : '';
 
   return '<div class="cartela ' + classeExtra + '">' +
     '<div class="cartela-header">' +
       '<div>' +
-        '<div class="cartela-nome">' + nomeDisplay + '</div>' +
+        '<div class="cartela-nome">' + (c.nome || 'Sem comprador') + '</div>' +
         '<div class="cartela-id">#' + c.id + '</div>' +
       '</div>' +
       '<div class="cartela-badges">' + badges + '</div>' +
@@ -473,33 +496,35 @@ function renderCartela(c) {
   '</div>';
 }
 
-// ─── CONTADORES ──────────────────────────────────────────────
+// ─── CONTADORES ───────────────────────────────────────────────
 function atualizarContadores() {
   document.getElementById('cnt-cartelas').textContent = cartelas.length;
-  document.getElementById('cnt-quina').textContent = cartelas.filter(c => c._temQuina && !c._temCheia).length;
-  document.getElementById('cnt-cheia').textContent = cartelas.filter(c => c._temCheia).length;
+  document.getElementById('cnt-quina').textContent = cartelas.filter(function(c){ return c._temQuina && !c._temCheia; }).length;
+  document.getElementById('cnt-cheia').textContent = cartelas.filter(function(c){ return c._temCheia; }).length;
   document.getElementById('cnt-pedras').textContent = pedrasSorteadas.size;
 }
 
-// ─── FILTROS ─────────────────────────────────────────────────
+// ─── FILTROS ──────────────────────────────────────────────────
 function filtrar(el) {
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('ativo'); });
   el.classList.add('ativo');
   filtroAtivo = el.dataset.filtro;
   renderizarCartelas();
 }
 
-// ─── ALERTAS ─────────────────────────────────────────────────
+// ─── ALERTAS ──────────────────────────────────────────────────
 function agendarAlerta(cartela, tipo) {
-  alertasFila.push({ cartela, tipo });
+  alertasFila.push({ cartela: cartela, tipo: tipo });
   if (!alertandoAgora) mostrarProximoAlerta();
 }
 
 function mostrarProximoAlerta() {
   if (!alertasFila.length) { alertandoAgora = false; return; }
   alertandoAgora = true;
-  const { cartela, tipo } = alertasFila.shift();
-  const isCheia = tipo === 'cheia';
+  var item = alertasFila.shift();
+  var cartela = item.cartela;
+  var tipo = item.tipo;
+  var isCheia = tipo === 'cheia';
 
   document.getElementById('modal-emoji').textContent = isCheia ? '🏆' : '⭐';
   document.getElementById('modal-titulo').textContent = isCheia ? 'CARTELA CHEIA!' : 'QUINA!';
@@ -511,14 +536,13 @@ function mostrarProximoAlerta() {
   document.getElementById('overlay').classList.add('ativo');
 
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const notas = isCheia ? [523,659,784,1047,1319] : [523,659,784];
-    notas.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var notas = isCheia ? [523,659,784,1047,1319] : [523,659,784];
+    notas.forEach(function(freq, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.value = freq;
-      osc.type = 'sine';
+      osc.frequency.value = freq; osc.type = 'sine';
       gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
       gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.18 + 0.05);
       gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.18 + 0.15);
@@ -530,10 +554,10 @@ function mostrarProximoAlerta() {
 
 function fecharModal() {
   document.getElementById('overlay').classList.remove('ativo');
-  setTimeout(() => mostrarProximoAlerta(), 300);
+  setTimeout(function(){ mostrarProximoAlerta(); }, 300);
 }
 
-// ─── LIMPAR ──────────────────────────────────────────────────
+// ─── LIMPAR ───────────────────────────────────────────────────
 function limparTudo() {
   if (!confirm('Limpar todas as cartelas e pedras?')) return;
   cartelas = [];
@@ -543,12 +567,12 @@ function limparTudo() {
   atualizarContadores();
 }
 
-// ─── ENTER no input manual ───────────────────────────────────
-document.getElementById('pedra-manual').addEventListener('keydown', e => {
+// ─── ENTER no input manual ────────────────────────────────────
+document.getElementById('pedra-manual').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') adicionarPedraManual();
 });
 
-// ─── INIT ────────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────
 iniciarCanal();
 atualizarContadores();
 renderizarPedras(null);
