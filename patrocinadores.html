@@ -157,8 +157,8 @@
 
 <script>
   var SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbyxYWSmr0zHOczqaUg7yoemsXrCDN9mW6WNQJi61IqOSBpBjm9QnB4k6mjwetCj5FYK/exec';
-  var SLIDE_MS    = 18000;   // tempo por slide (ms)
-  var RELOAD_MS   = 300000;  // recarrega da planilha a cada 5 min
+  var SLIDE_MS    = 18000;
+  var RELOAD_MS   = 300000;
 
   var THEMES = [
     { main:'#ffc400', alt:'#df2418', soft:'rgba(0,119,217,.62)' },
@@ -177,26 +177,34 @@
   var exitTimer     = null;
   var slideStart    = Date.now();
 
-  /* ── Busca dados da planilha ── */
+  /* ── Busca dados da planilha via JSONP (resolve CORS no GitHub Pages) ── */
   function carregarPatrocinios() {
-    var url = SCRIPT_URL + '?acao=listarPatrocinios&_=' + Date.now();
-    fetch(url)
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        if (data.sucesso && Array.isArray(data.patrocinios) && data.patrocinios.length) {
-          var currentNum = rows[index] && rows[index].num;
-          rows = data.patrocinios;
-          var sameIdx = rows.findIndex(function(r){ return r.num === currentNum; });
-          index = sameIdx >= 0 ? sameIdx : 0;
-          iniciarLoop();
-        } else {
-          mostrarStatus('Nenhum patrocinador encontrado na planilha.');
-        }
-      })
-      .catch(function(err) {
-        mostrarStatus('Erro ao carregar patrocinadores.\nTentando novamente em 30s...');
-        setTimeout(carregarPatrocinios, 30000);
-      });
+    var cbName = '_bingo_cb_' + Date.now();
+    var script = document.createElement('script');
+
+    window[cbName] = function(data) {
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      if (data.sucesso && Array.isArray(data.patrocinios) && data.patrocinios.length) {
+        var currentNum = rows[index] && rows[index].num;
+        rows = data.patrocinios;
+        var sameIdx = rows.findIndex(function(r){ return r.num === currentNum; });
+        index = sameIdx >= 0 ? sameIdx : 0;
+        iniciarLoop();
+      } else {
+        mostrarStatus('Nenhum patrocinador encontrado na planilha.');
+      }
+    };
+
+    script.onerror = function() {
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      mostrarStatus('Erro ao carregar patrocinadores.\nTentando novamente em 30s...');
+      setTimeout(carregarPatrocinios, 30000);
+    };
+
+    script.src = SCRIPT_URL + '?acao=listarPatrocinios&callback=' + cbName + '&_=' + Date.now();
+    document.head.appendChild(script);
   }
 
   /* ── Tela de status ── */
@@ -229,14 +237,12 @@
     var card = document.getElementById('card');
     card.classList.remove('exiting');
     FX.forEach(function(f){ card.classList.remove(f); });
-    void card.offsetWidth; // força reflow para reiniciar animação
+    void card.offsetWidth;
     card.classList.add(FX[index % FX.length]);
 
-    // número da pedra
     var numLabel = String(sp.num) === '0' ? 'Coringa' : 'Pedra ' + sp.num;
     document.getElementById('numBadge').textContent = numLabel;
 
-    // conteúdo
     document.getElementById('statusMsg').style.display = 'none';
 
     var nameEl  = document.getElementById('spName');
@@ -251,7 +257,6 @@
     phoneEl.style.display = sp.phone ? '' : 'none';
     msgEl.style.display   = sp.msg   ? '' : 'none';
 
-    // progress bar
     slideStart = Date.now();
     document.getElementById('progFill').style.width = '0%';
   }
@@ -284,7 +289,7 @@
     }
   }
 
-  /* ── BroadcastChannel (recebe do painel se aberto) ── */
+  /* ── BroadcastChannel ── */
   var canal = new BroadcastChannel('bingo-canal');
   canal.onmessage = function(e) {
     var d = e.data;
@@ -306,7 +311,7 @@
     if (e.key === 'ArrowLeft')  { clearInterval(slideTimer); avancar(-1); }
   });
 
-  /* ── Recarga periódica da planilha ── */
+  /* ── Recarga periódica ── */
   setInterval(carregarPatrocinios, RELOAD_MS);
 
   /* ── Início ── */
