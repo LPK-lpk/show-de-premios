@@ -889,7 +889,8 @@ function sortearCartela(){
 
 function enviarCartelaTelao(){
   if(!lastCartela){ fb('fbCartela','warn','Sorteie uma cartela primeiro.'); return; }
-  CANAL.postMessage({ tipo:'sorteio_cartela', payload:{ cartela:lastCartela, duracao:20000 } });
+  const cartelaPayload = { id: lastCartela.id, nome: lastCartela.comprador, telefone: lastCartela.telefone };
+  CANAL.postMessage({ tipo:'sorteio_cartela', payload:{ cartela: cartelaPayload, duracao:20000 } });
   fb('fbCartela','ok','Enviado para o telão por 20 segundos.');
 }
 
