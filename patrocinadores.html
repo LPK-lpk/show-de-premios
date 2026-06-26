@@ -69,17 +69,6 @@
     pointer-events: none;
   }
 
-  /* ── Kicker ── */
-  .kicker {
-    position: relative; z-index: 1;
-    font-size: clamp(14px, 2.1vh, 32px);
-    letter-spacing: .2em; text-transform: uppercase;
-    color: rgba(255,255,255,.65);
-    margin-bottom: 2.5vh;
-    font-weight: 800; user-select: none;
-    text-shadow: 0 1px 6px rgba(0,0,0,.7);
-  }
-
   /* ── Card ── */
   .sponsor-card {
     position: relative; z-index: 1;
@@ -91,7 +80,7 @@
 
   .sp-name {
     max-width: 100%;
-    font-size: clamp(52px, 10vh, 155px);
+    font-size: clamp(64px, 13vh, 200px);
     line-height: .95; font-weight: 900; color: #fff;
     text-wrap: balance; letter-spacing: .01em;
     -webkit-text-stroke: clamp(2px,.5vh,8px) var(--outline);
@@ -203,7 +192,6 @@
 
 <main class="stage">
   <div class="num-badge"  id="numBadge"></div>
-  <div class="kicker">✦ Patrocinador ✦</div>
 
   <section class="sponsor-card" id="card">
     <div class="status-msg" id="statusMsg">Carregando patrocinadores…</div>
