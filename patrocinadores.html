@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  /* ─── Reset & Base ─── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -26,10 +25,9 @@
     color: #fff;
     font-family: var(--font-sans);
   }
-
   body { display: flex; align-items: stretch; justify-content: stretch; }
 
-  /* ─── Camadas de fundo ─── */
+  /* ── Camadas de fundo com cross-fade ── */
   .bg-layer {
     position: fixed; inset: 0;
     background-size: cover;
@@ -40,14 +38,14 @@
   .layer-a { z-index: 0; opacity: 1; }
   .layer-b { z-index: 1; opacity: 0; }
 
-  /* Overlay escuro sobre os fundos */
+  /* Overlay escuro para legibilidade */
   .bg-overlay {
     position: fixed; inset: 0; z-index: 2;
-    background: rgba(0,0,0,.42);
+    background: rgba(0,0,0,.45);
     pointer-events: none;
   }
 
-  /* ─── Stage ─── */
+  /* ── Stage ── */
   .stage {
     position: relative; z-index: 3;
     width: 100vw; height: 100vh;
@@ -56,8 +54,6 @@
     padding: 7vh 7vw 6vh;
     isolation: isolate;
   }
-
-  /* Grade decorativa */
   .stage::before {
     content: ''; position: absolute; inset: 0;
     background:
@@ -66,8 +62,6 @@
     background-size: 5vw 5vw;
     pointer-events: none;
   }
-
-  /* Bordas decorativas */
   .stage::after {
     content: ''; position: absolute; inset: 6vh 6vw;
     border-top:    1px solid rgba(255,255,255,.12);
@@ -75,7 +69,7 @@
     pointer-events: none;
   }
 
-  /* ─── Kicker ─── */
+  /* ── Kicker ── */
   .kicker {
     position: relative; z-index: 1;
     font-size: clamp(14px, 2.1vh, 32px);
@@ -83,10 +77,10 @@
     color: rgba(255,255,255,.65);
     margin-bottom: 2.5vh;
     font-weight: 800; user-select: none;
-    text-shadow: 0 1px 6px rgba(0,0,0,.6);
+    text-shadow: 0 1px 6px rgba(0,0,0,.7);
   }
 
-  /* ─── Card do patrocinador ─── */
+  /* ── Card ── */
   .sponsor-card {
     position: relative; z-index: 1;
     width: min(88vw, 1500px); min-height: 54vh;
@@ -106,10 +100,9 @@
       .055em  .055em 0 var(--shadow-main),
       -.04em -.04em  0 var(--shadow-alt),
       .09em  -.035em 0 var(--shadow-soft),
-      0 .08em 0 rgba(0,0,0,.55),
-      0 .24em .28em rgba(0,0,0,.42);
+      0 .08em 0 rgba(0,0,0,.6),
+      0 .24em .28em rgba(0,0,0,.45);
   }
-
   .sp-phone {
     font-size: clamp(24px, 4.4vh, 68px);
     color: #fff; font-weight: 900;
@@ -119,9 +112,8 @@
       .055em  .055em 0 var(--shadow-alt),
       -.038em -.038em 0 var(--shadow-main),
       .078em  -.028em 0 var(--shadow-soft),
-      0 .14em .22em rgba(0,0,0,.38);
+      0 .14em .22em rgba(0,0,0,.4);
   }
-
   .sp-msg {
     max-width: 82vw;
     font-size: clamp(22px, 4vh, 64px);
@@ -133,42 +125,40 @@
       .052em  .052em 0 var(--shadow-main),
       -.034em -.034em 0 var(--shadow-alt),
       .074em  -.026em 0 var(--shadow-soft),
-      0 .13em .2em rgba(0,0,0,.36);
+      0 .13em .2em rgba(0,0,0,.38);
   }
 
-  /* ─── Badge de pedra ─── */
+  /* ── Badge de pedra ── */
   .num-badge {
     position: absolute; top: 7vh; left: 6vw; z-index: 4;
     font-size: clamp(13px,2.5vh,28px); font-weight: 900;
-    color: rgba(255,255,255,.35);
-    -webkit-text-stroke: 1px rgba(0,0,0,.2);
+    color: rgba(255,255,255,.4);
     user-select: none;
-    text-shadow: 0 1px 4px rgba(0,0,0,.5);
+    text-shadow: 0 1px 4px rgba(0,0,0,.6);
   }
 
-  /* ─── Assinatura da paróquia ─── */
+  /* ── Assinatura ── */
   .parish {
     position: absolute; right: 6vw; bottom: 7vh; z-index: 4;
     font-size: clamp(13px,1.9vh,26px);
-    color: rgba(255,255,255,.55);
+    color: rgba(255,255,255,.6);
     text-align: right; font-weight: 800; line-height: 1.4;
-    text-shadow: 0 1px 6px rgba(0,0,0,.6);
+    text-shadow: 0 1px 6px rgba(0,0,0,.7);
     display: flex; align-items: center; gap: 10px; justify-content: flex-end;
   }
   .parish img {
     height: 6.5vh; width: auto; object-fit: contain;
-    opacity: .8; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+    opacity: .85; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6));
   }
 
-  /* ─── Indicador de fundo ─── */
+  /* ── Indicador de fundo ── */
   .bg-indicator {
     position: absolute; left: 6vw; bottom: 7.5vh; z-index: 4;
-    font-size: clamp(10px,1.5vh,18px); font-weight: 700;
-    color: rgba(255,255,255,.25); user-select: none;
-    text-shadow: 0 1px 4px rgba(0,0,0,.5);
+    font-size: clamp(10px,1.4vh,16px); font-weight: 700;
+    color: rgba(255,255,255,.22); user-select: none;
   }
 
-  /* ─── Barra de progresso ─── */
+  /* ── Barra de progresso ── */
   .progress {
     position: fixed; left: 0; right: 0; bottom: 0; height: 7px;
     background: rgba(255,255,255,.08); z-index: 10;
@@ -179,15 +169,15 @@
     transition: width .25s linear;
   }
 
-  /* ─── Status ─── */
+  /* ── Status ── */
   .status-msg {
     color: rgba(255,255,255,.8);
     font-size: clamp(20px,3.5vh,52px);
     font-weight: 800; text-align: center; line-height: 1.4;
-    text-shadow: 0 2px 8px rgba(0,0,0,.6);
+    text-shadow: 0 2px 8px rgba(0,0,0,.7);
   }
 
-  /* ─── Animações de entrada ─── */
+  /* ── Animações ── */
   .sponsor-card.fx-rise  { animation: fx-rise  .82s cubic-bezier(.18,.9,.22,1) both; }
   .sponsor-card.fx-zoom  { animation: fx-zoom  .84s cubic-bezier(.18,.9,.22,1) both; }
   .sponsor-card.fx-left  { animation: fx-left  .84s cubic-bezier(.18,.9,.22,1) both; }
@@ -196,25 +186,23 @@
   .sponsor-card.fx-blur  { animation: fx-blur  .88s cubic-bezier(.18,.9,.22,1) both; }
   .sponsor-card.exiting  { animation: fx-exit  .50s cubic-bezier(.55,0,.7,.2)  both; }
 
-  @keyframes fx-rise  { from{opacity:0;transform:translateY(8vh) scale(.96); filter:blur(8px)}  to{opacity:1;transform:none;filter:none} }
-  @keyframes fx-zoom  { from{opacity:0;transform:scale(.72);                  filter:blur(10px)} to{opacity:1;transform:none;filter:none} }
+  @keyframes fx-rise  { from{opacity:0;transform:translateY(8vh) scale(.96);filter:blur(8px)}   to{opacity:1;transform:none;filter:none} }
+  @keyframes fx-zoom  { from{opacity:0;transform:scale(.72);filter:blur(10px)}                   to{opacity:1;transform:none;filter:none} }
   @keyframes fx-left  { from{opacity:0;transform:translateX(-12vw) rotate(-2deg);filter:blur(8px)} to{opacity:1;transform:none;filter:none} }
-  @keyframes fx-right { from{opacity:0;transform:translateX(12vw) rotate(2deg); filter:blur(8px)} to{opacity:1;transform:none;filter:none} }
+  @keyframes fx-right { from{opacity:0;transform:translateX(12vw) rotate(2deg);filter:blur(8px)}   to{opacity:1;transform:none;filter:none} }
   @keyframes fx-tilt  { from{opacity:0;transform:perspective(900px) rotateX(16deg) translateY(-4vh) scale(.94);filter:blur(8px)} to{opacity:1;transform:none;filter:none} }
-  @keyframes fx-blur  { from{opacity:0;transform:scale(1.12);filter:blur(16px)} to{opacity:1;transform:none;filter:none} }
+  @keyframes fx-blur  { from{opacity:0;transform:scale(1.12);filter:blur(16px)}                  to{opacity:1;transform:none;filter:none} }
   @keyframes fx-exit  { from{opacity:1;transform:none;filter:none} to{opacity:0;transform:translateY(-7vh) scale(.96);filter:blur(10px)} }
 </style>
 </head>
 <body>
 
-<!-- Camadas de fundo com cross-fade -->
 <div class="bg-layer layer-a" id="bgA"></div>
 <div class="bg-layer layer-b" id="bgB"></div>
 <div class="bg-overlay"></div>
 
 <main class="stage">
-
-  <div class="num-badge" id="numBadge"></div>
+  <div class="num-badge"  id="numBadge"></div>
   <div class="kicker">✦ Patrocinador ✦</div>
 
   <section class="sponsor-card" id="card">
@@ -224,36 +212,38 @@
     <div class="sp-msg"   id="spMsg"   style="display:none"></div>
   </section>
 
-  <!-- Assinatura da paróquia (usa imagem hospedada no repositório) -->
   <div class="parish">
-    <img src="imagens/brasao.png"
-         onerror="this.style.display='none'"
-         alt="Brasão">
+    <img src="imagens/brasao.png" onerror="this.style.display='none'" alt="">
     <span>Paróquia Sagrado Coração de Jesus<br>Marília — SP</span>
   </div>
 
-  <!-- Indicador de fundo -->
   <div class="bg-indicator" id="bgIndicator"></div>
-
 </main>
 
-<!-- Barra de progresso (fora do main para ficar na borda inferior) -->
 <div class="progress"><div class="progress-fill" id="progFill"></div></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════
    CONFIGURAÇÕES
-═══════════════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════════ */
 var CFG = {
-  SCRIPT_URL:  'https://script.google.com/macros/s/AKfycbyxYWSmr0zHOczqaUg7yoemsXrCDN9mW6WNQJi61IqOSBpBjm9QnB4k6mjwetCj5FYK/exec',
-  SLIDE_MS:    10000,   // ms por patrocinador
-  BG_MS:       60000,   // ms por fundo
-  FADE_MS:     1200,    // ms duração do fade
-  RELOAD_PAT:  180000,  // recarrega patrocinadores a cada 3 min
-  RELOAD_FUN:  600000   // recarrega fundos a cada 10 min
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyxYWSmr0zHOczqaUg7yoemsXrCDN9mW6WNQJi61IqOSBpBjm9QnB4k6mjwetCj5FYK/exec',
+  SLIDE_MS:   10000,   // ms por patrocinador
+  BG_MS:      60000,   // ms por fundo
+  RELOAD_MS:  300000   // recarrega patrocinadores a cada 5 min
 };
 
-/* ─── Temas de cores ─── */
+/* ── Fundos locais (caminhos relativos no GitHub Pages) ──
+   Adicione ou remova entradas conforme as imagens do repositório.   */
+var FUNDOS_LOCAL = [
+  { caminho: 'imagens/fundos/fundo_luzes.webp',  nome: 'Luzes'     },
+  { caminho: 'imagens/fundos/aparecida.webp',    nome: 'Aparecida' },
+  { caminho: 'imagens/fundos/matriz.webp',       nome: 'Matriz'    },
+  { caminho: 'imagens/fundos/obra.webp',         nome: 'Obra'      },
+  { caminho: 'imagens/fundos/santo_espedito.webp', nome: 'Espedito' }
+];
+
+/* ── Temas de cores ── */
 var THEMES = [
   { main:'#ffc400', alt:'#df2418', soft:'rgba(0,119,217,.62)'  },
   { main:'#0077d9', alt:'#ffc400', soft:'rgba(223,36,24,.58)'  },
@@ -262,150 +252,158 @@ var THEMES = [
   { main:'#0077d9', alt:'#df2418', soft:'rgba(255,196,0,.66)'  },
   { main:'#df2418', alt:'#ffc400', soft:'rgba(0,119,217,.62)'  }
 ];
-
-/* ─── Efeitos de entrada ─── */
 var FX = ['fx-rise','fx-zoom','fx-left','fx-right','fx-tilt','fx-blur'];
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════
    ESTADO
-═══════════════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════════ */
 var state = {
-  pats:       [],        // patrocinadores carregados
-  fundos:     [],        // fundos carregados
-  patIdx:     0,         // índice do patrocinador atual
-  bgIdx:      0,         // índice do fundo atual
-  activeBg:   'A',       // camada ativa ('A' ou 'B')
+  pats:       [],
+  fundos:     [],
+  patIdx:     0,
+  bgIdx:      0,
+  activeBg:   'A',
   slideStart: Date.now(),
-  timers:     { slide:null, prog:null, exit:null, bg:null, rP:null, rF:null }
+  t: { slide:null, prog:null, exit:null, bg:null, reload:null }
 };
 
-/* ─── Referências DOM ─── */
+/* ── DOM ── */
 var el = {
-  bgA:      document.getElementById('bgA'),
-  bgB:      document.getElementById('bgB'),
-  bgInd:    document.getElementById('bgIndicator'),
-  badge:    document.getElementById('numBadge'),
-  card:     document.getElementById('card'),
-  status:   document.getElementById('statusMsg'),
-  name:     document.getElementById('spName'),
-  phone:    document.getElementById('spPhone'),
-  msg:      document.getElementById('spMsg'),
-  prog:     document.getElementById('progFill')
+  bgA:    document.getElementById('bgA'),
+  bgB:    document.getElementById('bgB'),
+  bgInd:  document.getElementById('bgIndicator'),
+  badge:  document.getElementById('numBadge'),
+  card:   document.getElementById('card'),
+  status: document.getElementById('statusMsg'),
+  name:   document.getElementById('spName'),
+  phone:  document.getElementById('spPhone'),
+  msg:    document.getElementById('spMsg'),
+  prog:   document.getElementById('progFill')
 };
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════
    UTILITÁRIOS
-═══════════════════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════════════════ */
 
-/**
- * Requisição JSONP — necessário no GitHub Pages (sem CORS).
- * @param {string}   baseUrl  - URL base sem callback
- * @param {Function} cb       - cb(err, data)
- */
-function jsonp(baseUrl, cb) {
-  var id  = '_cb_' + Date.now() + '_' + (Math.random() * 9999 | 0);
+/* JSONP — necessário no GitHub Pages (sem CORS) */
+function jsonp(url, cb) {
+  var id  = '_cb' + Date.now();
   var tag = document.createElement('script');
-
   window[id] = function(data) {
     try { delete window[id]; } catch(e) { window[id] = void 0; }
     tag.parentNode && tag.parentNode.removeChild(tag);
     cb(null, data);
   };
-
   tag.onerror = function() {
     try { delete window[id]; } catch(e) { window[id] = void 0; }
     tag.parentNode && tag.parentNode.removeChild(tag);
-    cb(new Error('network'));
+    cb(new Error('net'));
   };
-
-  tag.src = baseUrl + '&callback=' + id + '&_=' + Date.now();
+  tag.src = url + '&callback=' + id + '&_=' + Date.now();
   document.head.appendChild(tag);
 }
 
-/** Pré-carrega imagem, executa cb() ao terminar (sucesso ou erro). */
-function preload(src, cb) {
+/* Testa se uma URL de imagem carrega; chama cb(true/false) */
+function testImg(src, cb) {
   var img = new Image();
-  img.onload = img.onerror = function() { cb && cb(); };
+  img.onload  = function() { cb(true);  };
+  img.onerror = function() { cb(false); };
   img.src = src;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   GESTÃO DE FUNDOS
-═══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   FUNDOS
+══════════════════════════════════════════════════════════════════ */
 
-/** Faz cross-fade para um novo fundo. */
+/* Cross-fade para um novo fundo */
 function applyBg(src, nome) {
-  var in_  = state.activeBg === 'A' ? el.bgB : el.bgA;
-  var out_ = state.activeBg === 'A' ? el.bgA : el.bgB;
+  var inEl  = state.activeBg === 'A' ? el.bgB : el.bgA;
+  var outEl = state.activeBg === 'A' ? el.bgA : el.bgB;
 
-  in_.style.zIndex = 1;
-  out_.style.zIndex = 0;
-
-  in_.style.backgroundImage = 'url("' + src + '")';
-  in_.style.opacity = 0;
-  void in_.offsetWidth; // reflow
-
-  var dur = (CFG.FADE_MS / 1000) + 's';
-  in_.style.transition  = 'opacity ' + dur + ' ease';
-  out_.style.transition = 'opacity ' + dur + ' ease';
-  in_.style.opacity  = 1;
-  out_.style.opacity = 0;
+  inEl.style.zIndex = 1;
+  outEl.style.zIndex = 0;
+  inEl.style.backgroundImage = 'url("' + src + '")';
+  inEl.style.opacity = 0;
+  void inEl.offsetWidth;
+  inEl.style.transition  = 'opacity 1.2s ease';
+  outEl.style.transition = 'opacity 1.2s ease';
+  inEl.style.opacity  = 1;
+  outEl.style.opacity = 0;
 
   state.activeBg = state.activeBg === 'A' ? 'B' : 'A';
   el.bgInd.textContent = nome ? '🖼 ' + nome : '';
 }
 
-/** Avança para o próximo fundo. */
+/* Avança para o próximo fundo da lista */
 function nextBg() {
   if (!state.fundos.length) return;
   state.bgIdx = (state.bgIdx + 1) % state.fundos.length;
   var f = state.fundos[state.bgIdx];
-  applyBg(f.url || f.caminho, f.nome);
+  applyBg(f.caminho, f.nome);
 }
 
-/** Inicia ciclo automático de fundos. */
+/* Inicia ciclo automático de fundos */
 function startBgCycle() {
-  clearInterval(state.timers.bg);
-  state.timers.bg = setInterval(nextBg, CFG.BG_MS);
+  clearInterval(state.t.bg);
+  if (state.fundos.length > 1)
+    state.t.bg = setInterval(nextBg, CFG.BG_MS);
 }
 
-/** Carrega lista de fundos da API. */
+/*
+  Tenta carregar fundos pela API. Se a API não retornar fundos válidos,
+  usa os caminhos locais definidos em FUNDOS_LOCAL,
+  filtrando apenas as imagens que realmente existem no servidor.
+*/
 function loadFundos() {
   jsonp(CFG.SCRIPT_URL + '?acao=listarFundos', function(err, data) {
-    if (err || !data || !data.sucesso) {
-      console.warn('[fundos] erro:', err);
-      return;
+    var lista = [];
+
+    if (!err && data && data.sucesso) {
+      /* Tenta extrair a lista de múltiplos formatos possíveis */
+      if      (data.dados && Array.isArray(data.dados.fundos))  lista = data.dados.fundos;
+      else if (data.dados && Array.isArray(data.dados))         lista = data.dados;
+      else if (Array.isArray(data.fundos))                      lista = data.fundos;
     }
 
-    // Compatibilidade com múltiplos formatos de resposta
-    var lista = [];
-    if (data.dados) {
-      if (Array.isArray(data.dados.fundos))      lista = data.dados.fundos;
-      else if (Array.isArray(data.dados))        lista = data.dados;
-    } else if (Array.isArray(data.fundos))       lista = data.fundos;
+    if (lista.length) {
+      /* API retornou fundos — normaliza o campo de caminho */
+      state.fundos = lista.map(function(f) {
+        return { caminho: f.url || f.caminho || f.path || '', nome: f.nome || f.name || '' };
+      }).filter(function(f) { return f.caminho; });
+    }
 
-    if (!lista.length) return;
-
-    // Pré-carrega todas as imagens antes de exibir
-    var done = 0;
-    lista.forEach(function(f) {
-      preload(f.url || f.caminho, function() {
-        done++;
-        if (done === lista.length) {
-          state.fundos = lista;
-          applyBg(lista[0].url || lista[0].caminho, lista[0].nome);
-          startBgCycle();
-        }
+    if (!state.fundos.length) {
+      /* Fallback: usa lista local, testa cada imagem antes de usar */
+      var valid = [];
+      var total = FUNDOS_LOCAL.length;
+      var done  = 0;
+      FUNDOS_LOCAL.forEach(function(f) {
+        testImg(f.caminho, function(ok) {
+          if (ok) valid.push(f);
+          done++;
+          if (done === total) {
+            if (valid.length) {
+              state.fundos = valid;
+              applyBg(state.fundos[0].caminho, state.fundos[0].nome);
+              startBgCycle();
+            }
+            /* Se nenhuma imagem carregou, fundo fica preto — sem erro */
+          }
+        });
       });
-    });
+      return; /* sai aqui — applyBg será chamado dentro do testImg */
+    }
+
+    /* API retornou fundos válidos */
+    applyBg(state.fundos[0].caminho, state.fundos[0].nome);
+    startBgCycle();
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   GESTÃO DE PATROCINADORES
-═══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   PATROCINADORES
+══════════════════════════════════════════════════════════════════ */
 
-/** Aplica tema de cores via CSS custom properties. */
 function applyTheme(i) {
   var t = THEMES[i % THEMES.length];
   var r = document.documentElement;
@@ -414,7 +412,6 @@ function applyTheme(i) {
   r.style.setProperty('--shadow-soft', t.soft);
 }
 
-/** Exibe mensagem de status no card. */
 function showStatus(msg) {
   el.badge.textContent    = '';
   el.status.style.display = '';
@@ -425,7 +422,6 @@ function showStatus(msg) {
   el.prog.style.width     = '0%';
 }
 
-/** Renderiza o patrocinador no índice atual. */
 function render() {
   if (!state.pats.length) { showStatus('Aguardando patrocinadores…'); return; }
   if (state.patIdx >= state.pats.length) state.patIdx = 0;
@@ -433,18 +429,16 @@ function render() {
   var sp = state.pats[state.patIdx];
   applyTheme(state.patIdx);
 
-  // Animação de entrada
   FX.forEach(function(f) { el.card.classList.remove(f); });
   el.card.classList.remove('exiting');
   void el.card.offsetWidth;
   el.card.classList.add(FX[state.patIdx % FX.length]);
 
-  // Badge
   el.badge.textContent = String(sp.num) === '0' ? 'Coringa' : 'Pedra ' + sp.num;
 
-  // Conteúdo
   el.status.style.display = 'none';
 
+  /* Compatível com campos em inglês (name/phone/msg) e português (nome/fone/mensagem) */
   el.name.textContent  = sp.name  || sp.nome       || '';
   el.phone.textContent = sp.phone || sp.fone        || '';
   el.msg.textContent   = sp.msg   || sp.mensagem    || '';
@@ -453,127 +447,104 @@ function render() {
   el.phone.style.display = el.phone.textContent ? '' : 'none';
   el.msg.style.display   = el.msg.textContent   ? '' : 'none';
 
-  // Reinicia barra de progresso
   state.slideStart = Date.now();
   el.prog.style.width = '0%';
 }
 
-/** Avança/recua com animação de saída. */
 function advance(delta) {
   if (!state.pats.length) return;
   FX.forEach(function(f) { el.card.classList.remove(f); });
   el.card.classList.add('exiting');
-  clearTimeout(state.timers.exit);
-  state.timers.exit = setTimeout(function() {
+  clearTimeout(state.t.exit);
+  state.t.exit = setTimeout(function() {
     state.patIdx = (state.patIdx + delta + state.pats.length) % state.pats.length;
     render();
   }, 500);
 }
 
-/** Inicia / reinicia o loop de slides. */
 function startLoop() {
-  clearInterval(state.timers.slide);
-  clearInterval(state.timers.prog);
-  clearTimeout(state.timers.exit);
+  clearInterval(state.t.slide);
+  clearInterval(state.t.prog);
+  clearTimeout(state.t.exit);
   render();
   if (state.pats.length > 1) {
-    state.timers.slide = setInterval(function() { advance(1); }, CFG.SLIDE_MS);
-    state.timers.prog  = setInterval(function() {
+    state.t.slide = setInterval(function() { advance(1); }, CFG.SLIDE_MS);
+    state.t.prog  = setInterval(function() {
       var pct = Math.min(100, (Date.now() - state.slideStart) / CFG.SLIDE_MS * 100);
       el.prog.style.width = pct + '%';
     }, 200);
   }
 }
 
-/** Carrega lista de patrocinadores da API. */
 function loadPats() {
   jsonp(CFG.SCRIPT_URL + '?acao=listarPatrocinios', function(err, data) {
     if (err || !data || !data.sucesso) {
-      showStatus('Erro ao carregar patrocinadores.\nTentando novamente em 30s…');
+      showStatus('Erro ao carregar. Tentando em 30s…');
       setTimeout(loadPats, 30000);
       return;
     }
 
-    // Compatibilidade com múltiplos formatos
+    /* ── Extrai a lista — suporta todos os formatos conhecidos ── */
     var lista = [];
-    if (data.dados) {
-      if (Array.isArray(data.dados.patrocinadores)) lista = data.dados.patrocinadores;
-      else if (Array.isArray(data.dados.patrocinios)) lista = data.dados.patrocinios;
-      else if (Array.isArray(data.dados))             lista = data.dados;
-    } else if (Array.isArray(data.patrocinios))       lista = data.patrocinios;
+    if      (data.dados && Array.isArray(data.dados.patrocinadores)) lista = data.dados.patrocinadores;
+    else if (data.dados && Array.isArray(data.dados.patrocinios))    lista = data.dados.patrocinios;
+    else if (data.dados && Array.isArray(data.dados))                lista = data.dados;
+    else if (Array.isArray(data.patrocinios))                        lista = data.patrocinios;  /* formato atual */
+    else if (Array.isArray(data.patrocinadores))                     lista = data.patrocinadores;
 
     if (!lista.length) { showStatus('Nenhum patrocinador encontrado.'); return; }
 
-    // Mantém o patrocinador atual ao recarregar
     var curNum = state.pats[state.patIdx] && state.pats[state.patIdx].num;
     state.pats = lista;
     var same = lista.findIndex(function(r) { return r.num === curNum; });
     state.patIdx = same >= 0 ? same : 0;
-
     startLoop();
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   BROADCASTCHANNEL — sincronização com painel.html
-═══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   BROADCASTCHANNEL
+══════════════════════════════════════════════════════════════════ */
 try {
   var ch = new BroadcastChannel('bingo-canal');
   ch.onmessage = function(e) {
     var d = e && e.data;
     if (!d) return;
-
-    // Lista de patrocinadores vinda do painel
     if (d.tipo === 'sponsors' && Array.isArray(d.payload) && d.payload.length) {
-      var valid = d.payload.filter(function(r) { return r && r.name; });
-      if (valid.length) { state.pats = valid; state.patIdx = 0; startLoop(); }
+      var v = d.payload.filter(function(r) { return r && r.name; });
+      if (v.length) { state.pats = v; state.patIdx = 0; startLoop(); }
     }
-
-    // Lista de fundos vinda do painel
     if (d.tipo === 'fundos' && Array.isArray(d.payload) && d.payload.length) {
       state.fundos = d.payload; state.bgIdx = 0;
-      applyBg(state.fundos[0].url || state.fundos[0].caminho, state.fundos[0].nome);
+      applyBg(state.fundos[0].caminho || state.fundos[0].url, state.fundos[0].nome);
       startBgCycle();
     }
   };
 } catch(ignore) {}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ATALHOS DE TECLADO
-═══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   TECLADO
+══════════════════════════════════════════════════════════════════ */
 document.addEventListener('keydown', function(e) {
   switch(e.key) {
     case 'f': case 'F':
-      /* Fullscreen */
       if (!document.fullscreenElement)
         document.documentElement.requestFullscreen().catch(function(){});
       break;
     case 'ArrowRight':
-      /* Próximo patrocinador */
-      clearInterval(state.timers.slide);
-      advance(1);
-      break;
+      clearInterval(state.t.slide); advance(1);  break;
     case 'ArrowLeft':
-      /* Patrocinador anterior */
-      clearInterval(state.timers.slide);
-      advance(-1);
-      break;
+      clearInterval(state.t.slide); advance(-1); break;
     case 'ArrowUp':
-      /* Próximo fundo manualmente */
-      if (state.fundos.length > 1) nextBg();
-      break;
+      if (state.fundos.length > 1) nextBg();     break;
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   RECARGAS PERIÓDICAS
-═══════════════════════════════════════════════════════════════════════════ */
-state.timers.rP = setInterval(loadPats,  CFG.RELOAD_PAT);
-state.timers.rF = setInterval(loadFundos, CFG.RELOAD_FUN);
+/* ══════════════════════════════════════════════════════════════════
+   RECARGA PERIÓDICA & INICIALIZAÇÃO
+══════════════════════════════════════════════════════════════════ */
+state.t.reload = setInterval(loadPats, CFG.RELOAD_MS);
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   INICIALIZAÇÃO
-═══════════════════════════════════════════════════════════════════════════ */
 loadFundos();
 loadPats();
 </script>
