@@ -773,26 +773,84 @@ function updateHist(){
 /* ══════════════════════════════════════════════════════════
    SORTEIO DE CARTELAS
 ══════════════════════════════════════════════════════════ */
+var _sc = {
+  cartelas:    [],
+  disponiveis: [],
+  historico:   [],
+  carregando:  false,
+  sorteando:   false
+};
+
+async function carregarContadorCartelas(){
+  if(!scriptUrl) return;
+  _sc.carregando = true;
+  _sc.cartelas   = [];
+  _scStatus('Carregando…');
+  await _scBuscarPagina(1);
+}
+
+async function _scBuscarPagina(pagina){
+  try{
+    const url  = scriptUrl+'?acao=listarCartelas&pagina='+pagina+'&limite=500&_='+Date.now();
+    const r    = await fetch(url);
+    const data = await r.json();
+    if(!data.sucesso){ _scStatus('Erro ao carregar.'); _sc.carregando=false; return; }
+    const d = data.dados;
+    (d.cartelas||[]).forEach(c=>{
+      _sc.cartelas.push({ id:c.id, comprador:c.comprador||'', telefone:c.telefone||'', sorteada:c.sorteada||false });
+    });
+    if(d.temProxima){ await _scBuscarPagina(pagina+1); }
+    else{ _sc.carregando=false; _scRecalcular(); }
+  }catch(e){ _sc.carregando=false; _scStatus('Erro de rede.'); }
+}
+
+function _scRecalcular(){
+  _sc.disponiveis = _sc.cartelas.filter(c=>!c.sorteada).map(c=>c.id);
+  const total     = _sc.cartelas.length;
+  const sorteadas = total - _sc.disponiveis.length;
+  const disp      = _sc.disponiveis.length;
+  document.getElementById('ctTotal').textContent = total;
+  document.getElementById('ctDisp').textContent  = disp;
+  document.getElementById('ctSort').textContent  = sorteadas;
+  const btn = document.getElementById('btnSortearCartela');
+  if(btn) btn.disabled = (disp===0 || _sc.carregando);
+  _scStatus(disp>0 ? disp+' disponíve'+(disp!==1?'is':'l') : '⚠️ Todas as cartelas já foram sorteadas!');
+}
+
 async function sortearCartela(){
   if(!scriptUrl){ fb('fbCartela','err','Configure a URL do Apps Script nas configurações.'); return; }
-  document.getElementById('btnSortearCartela').disabled=true;
-  document.getElementById('btnSortearCartela').innerHTML='<i class="ti ti-loader"></i> Sorteando...';
+  if(_sc.sorteando || _sc.disponiveis.length===0) return;
+  _sc.sorteando=true;
+  const btn=document.getElementById('btnSortearCartela');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader"></i> Sorteando...';
+  const idx     = Math.floor(Math.random()*_sc.disponiveis.length);
+  const id      = _sc.disponiveis[idx];
+  const cartela = _sc.cartelas.find(c=>c.id===id);
   try{
-    const url=scriptUrl+'?acao=sortearCartela&_='+Date.now();
-    const r=await fetch(url); const data=await r.json();
-    if(!data.sucesso){ fb('fbCartela','err',data.mensagem||'Erro ao sortear.'); return; }
-    lastCartela=data.cartela;
-    document.getElementById('resNumero').textContent='#'+data.cartela.id;
-    document.getElementById('resNome').textContent=data.cartela.nome||'Sem nome';
-    document.getElementById('resInfo').textContent=data.cartela.restantes+' cartelas ainda disponíveis';
+    const r = await fetch(scriptUrl,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({acao:'marcarSorteada',id:id})
+    });
+    const data = await r.json();
+    if(!data.sucesso){ fb('fbCartela','err',data.dados?.mensagem||'Erro ao sortear.'); return; }
+    cartela.sorteada=true;
+    _sc.disponiveis.splice(idx,1);
+    lastCartela=cartela;
+    document.getElementById('resNumero').textContent='#'+id;
+    document.getElementById('resNome').textContent=cartela.comprador||'Sem nome';
+    document.getElementById('resInfo').textContent=cartela.telefone||'';
     document.getElementById('cartelaResult').classList.add('show');
-    // Atualiza contador
-    carregarContadorCartelas();
+    _sc.historico.unshift({ id, comprador:cartela.comprador, telefone:cartela.telefone, hora:new Date().toLocaleTimeString('pt-BR') });
+    _scRenderHistorico();
+    _scRecalcular();
   }catch(e){
     fb('fbCartela','err','Erro de conexão: '+e.message);
   }finally{
-    document.getElementById('btnSortearCartela').disabled=false;
-    document.getElementById('btnSortearCartela').innerHTML='<i class="ti ti-cards"></i> SORTEAR CARTELA';
+    _sc.sorteando=false;
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-cards"></i> SORTEAR CARTELA';
   }
 }
 
@@ -807,28 +865,48 @@ function ocultarCartelaTelao(){
   fb('fbCartela','ok','Overlay ocultado do telão.');
 }
 
-async function carregarContadorCartelas(){
-  if(!scriptUrl) return;
-  try{
-    const url=scriptUrl+'?acao=listarSorteadas&_='+Date.now();
-    const r=await fetch(url); const data=await r.json();
-    if(data.sucesso){
-      document.getElementById('ctTotal').textContent=data.total;
-      document.getElementById('ctDisp').textContent=data.disponiveis;
-      document.getElementById('ctSort').textContent=data.sorteadas;
-    }
-  }catch(e){}
-}
-
 async function confirmarResetSorteios(){
   if(!confirm('Resetar TODOS os sorteios de cartelas? Esta ação não pode ser desfeita.')) return;
   if(!scriptUrl){ fb('fbCartela','err','Configure o Apps Script.'); return; }
   try{
-    const url=scriptUrl+'?acao=resetarSorteios&_='+Date.now();
-    const r=await fetch(url); const data=await r.json();
-    if(data.sucesso){ fb('fbCartela','ok','Sorteios resetados!'); document.getElementById('cartelaResult').classList.remove('show'); lastCartela=null; carregarContadorCartelas(); }
-    else fb('fbCartela','err',data.mensagem);
+    const r = await fetch(scriptUrl,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({acao:'resetarSorteios'})
+    });
+    const data = await r.json();
+    if(data.sucesso){
+      fb('fbCartela','ok','Sorteios resetados! '+(data.dados?.mensagem||''));
+      document.getElementById('cartelaResult').classList.remove('show');
+      lastCartela=null;
+      _sc.historico=[];
+      _scRenderHistorico();
+      carregarContadorCartelas();
+    } else { fb('fbCartela','err',data.dados?.mensagem||'Erro ao resetar.'); }
   }catch(e){ fb('fbCartela','err','Erro: '+e.message); }
+}
+
+function _scRenderHistorico(){
+  const el=document.getElementById('scHistoricoBody');
+  if(!el) return;
+  const cnt=document.getElementById('scHistoricoCount');
+  if(cnt) cnt.textContent=_sc.historico.length;
+  if(!_sc.historico.length){
+    el.innerHTML='<tr><td colspan="4" style="text-align:center;color:#444;padding:16px">Nenhum sorteio ainda.</td></tr>';
+    return;
+  }
+  el.innerHTML=_sc.historico.map(h=>`
+    <tr>
+      <td style="font-size:18px;font-weight:900;color:#fbbf24;padding:6px 10px">#${h.id}</td>
+      <td style="color:#e5e5e5;padding:6px 10px">${h.comprador||'—'}</td>
+      <td style="color:#888;padding:6px 10px">${h.telefone||'—'}</td>
+      <td style="color:#555;padding:6px 10px">${h.hora}</td>
+    </tr>`).join('');
+}
+
+function _scStatus(msg){
+  const el=document.getElementById('scStatusMsg');
+  if(el) el.textContent=msg;
 }
 
 /* ══════════════════════════════════════════════════════════
