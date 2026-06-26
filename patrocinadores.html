@@ -236,11 +236,11 @@ var CFG = {
 /* ── Fundos locais (caminhos relativos no GitHub Pages) ──
    Adicione ou remova entradas conforme as imagens do repositório.   */
 var FUNDOS_LOCAL = [
-  { caminho: 'imagens/fundos/fundo_luzes.webp',  nome: 'Luzes'     },
-  { caminho: 'imagens/fundos/aparecida.webp',    nome: 'Aparecida' },
-  { caminho: 'imagens/fundos/matriz.webp',       nome: 'Matriz'    },
-  { caminho: 'imagens/fundos/obra.webp',         nome: 'Obra'      },
-  { caminho: 'imagens/fundos/santo_espedito.webp', nome: 'Espedito' }
+  { caminho: 'imagens/fundos/fundo_luzes.webp',    nome: 'Luzes'     },
+  { caminho: 'imagens/fundos/aparecida.webp',      nome: 'Aparecida' },
+  { caminho: 'imagens/fundos/matriz.webp',         nome: 'Matriz'    },
+  { caminho: 'imagens/fundos/obra.webp',           nome: 'Obra'      },
+  { caminho: 'imagens/fundos/santo_espedito.webp', nome: 'Espedito'  }
 ];
 
 /* ── Temas de cores ── */
@@ -355,48 +355,24 @@ function startBgCycle() {
   filtrando apenas as imagens que realmente existem no servidor.
 */
 function loadFundos() {
-  jsonp(CFG.SCRIPT_URL + '?acao=listarFundos', function(err, data) {
-    var lista = [];
+  /* A API de fundos não está implementada — usa caminhos locais direto.
+     Testa cada imagem antes de adicionar à lista (evita 404 silencioso). */
+  var valid = [];
+  var total = FUNDOS_LOCAL.length;
+  var done  = 0;
 
-    if (!err && data && data.sucesso) {
-      /* Tenta extrair a lista de múltiplos formatos possíveis */
-      if      (data.dados && Array.isArray(data.dados.fundos))  lista = data.dados.fundos;
-      else if (data.dados && Array.isArray(data.dados))         lista = data.dados;
-      else if (Array.isArray(data.fundos))                      lista = data.fundos;
-    }
-
-    if (lista.length) {
-      /* API retornou fundos — normaliza o campo de caminho */
-      state.fundos = lista.map(function(f) {
-        return { caminho: f.url || f.caminho || f.path || '', nome: f.nome || f.name || '' };
-      }).filter(function(f) { return f.caminho; });
-    }
-
-    if (!state.fundos.length) {
-      /* Fallback: usa lista local, testa cada imagem antes de usar */
-      var valid = [];
-      var total = FUNDOS_LOCAL.length;
-      var done  = 0;
-      FUNDOS_LOCAL.forEach(function(f) {
-        testImg(f.caminho, function(ok) {
-          if (ok) valid.push(f);
-          done++;
-          if (done === total) {
-            if (valid.length) {
-              state.fundos = valid;
-              applyBg(state.fundos[0].caminho, state.fundos[0].nome);
-              startBgCycle();
-            }
-            /* Se nenhuma imagem carregou, fundo fica preto — sem erro */
-          }
-        });
-      });
-      return; /* sai aqui — applyBg será chamado dentro do testImg */
-    }
-
-    /* API retornou fundos válidos */
-    applyBg(state.fundos[0].caminho, state.fundos[0].nome);
-    startBgCycle();
+  FUNDOS_LOCAL.forEach(function(f) {
+    testImg(f.caminho, function(ok) {
+      if (ok) valid.push(f);
+      done++;
+      if (done === total) {
+        if (valid.length) {
+          state.fundos = valid;
+          applyBg(state.fundos[0].caminho, state.fundos[0].nome);
+          startBgCycle();
+        }
+      }
+    });
   });
 }
 
