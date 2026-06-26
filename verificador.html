@@ -255,72 +255,46 @@ function jsonp(url, cb) {
    cada cartela individualmente via buscarCartela (que tem grade).
 ══════════════════════════════════════════════════════════════ */
 function carregarCartelas() {
-  var grade = document.getElementById('grade');
-  grade.innerHTML = '<div class="loading"><div class="spinner"></div>Buscando lista de cartelas…</div>';
-  mostrarProgresso('Buscando lista de cartelas…', 0);
+  var gradeEl = document.getElementById('grade');
+  gradeEl.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando cartelas…</div>';
+  mostrarProgresso('Buscando cartelas…', 0);
 
+  /* Uma única chamada — listarCartelas agora retorna grade completa */
   jsonp(API + '?acao=listarCartelas', function(err, data) {
+    esconderProgresso();
+
     if (err || !data || !data.sucesso) {
-      grade.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div><p>Erro ao buscar lista: ' + (err ? err.message : (data && data.mensagem) || 'desconhecido') + '</p></div>';
-      esconderProgresso();
+      gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div>' +
+        '<p>Erro ao carregar cartelas.</p>' +
+        '<p style="font-size:12px;margin-top:8px;">' + (err ? err.message : (data && data.dados && data.dados.mensagem) || 'Verifique a conexão.') + '</p></div>';
       return;
     }
 
     var lista = (data.dados && data.dados.cartelas) ? data.dados.cartelas : [];
     if (!lista.length) {
-      grade.innerHTML = '<div class="estado-vazio"><div class="icon">📭</div><p>Nenhuma cartela encontrada na planilha.</p></div>';
-      esconderProgresso();
+      gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">📭</div><p>Nenhuma cartela encontrada na planilha.</p></div>';
       return;
     }
 
-    /* Agora busca cada cartela individualmente para obter a grade */
-    cartelas = [];
-    var total   = lista.length;
-    var carregados = 0;
-    var erros   = 0;
-
-    mostrarProgresso('Carregando ' + total + ' cartelas…', 0);
-
-    lista.forEach(function(item) {
-      var idCartela = item.id;
-      jsonp(API + '?acao=buscarCartela&id=' + idCartela, function(err2, data2) {
-        carregados++;
-        var pct = Math.round(carregados / total * 100);
-        mostrarProgresso('Carregando cartela ' + carregados + ' de ' + total + '…', pct);
-
-        if (!err2 && data2 && data2.sucesso && data2.dados && data2.dados.cartela) {
-          var c = data2.dados.cartela;
-          cartelas.push({
-            id:               c.id,
-            nome:             c.comprador || item.comprador || '',
-            telefone:         c.telefone  || item.telefone  || '',
-            grade:            c.grade     || [],
-            numeros:          c.numeros   || [],
-            quinaJaAlertada:  false,
-            cheiaJaAlertada:  false,
-            _marcadas:        [],
-            _temQuina:        false,
-            _temCheia:        false
-          });
-        } else {
-          erros++;
-        }
-
-        /* Quando todas terminarem */
-        if (carregados === total) {
-          esconderProgresso();
-          if (!cartelas.length) {
-            grade.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div><p>Nenhuma cartela com grade encontrada.</p></div>';
-            return;
-          }
-          /* Ordena por id */
-          cartelas.sort(function(a, b) { return a.id - b.id; });
-          verificarCartelas();
-          atualizarContadores();
-          if (erros > 0) console.warn(erros + ' cartela(s) com erro ao carregar.');
-        }
-      });
+    cartelas = lista.map(function(c) {
+      return {
+        id:              c.id,
+        nome:            c.comprador || '',
+        telefone:        c.telefone  || '',
+        grade:           c.grade     || [],
+        numeros:         c.numeros   || [],
+        quinaJaAlertada: false,
+        cheiaJaAlertada: false,
+        _marcadas:       [],
+        _temQuina:       false,
+        _temCheia:       false
+      };
     });
+
+    /* Ordena por id */
+    cartelas.sort(function(a, b) { return a.id - b.id; });
+    verificarCartelas();
+    atualizarContadores();
   });
 }
 
