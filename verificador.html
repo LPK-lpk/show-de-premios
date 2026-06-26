@@ -9,12 +9,10 @@
     --verde-escuro: #0A3D1A;
     --verde-medio:  #1A6B30;
     --verde-claro:  #A8E063;
-    --verde-fundo:  #EAF5D0;
     --cinza-fundo:  #F5F5F5;
     --cinza-borda:  #D0D0D0;
     --texto:        #1A1A1A;
     --texto-mudo:   #666;
-    --branco:       #FFFFFF;
     --amarelo:      #FFD600;
     --laranja:      #FF7A00;
     --vermelho:     #D32F2F;
@@ -30,7 +28,7 @@
   .dot { width: 8px; height: 8px; border-radius: 50%; background: #aaa; transition: background .3s; }
   .dot.ativo { background: var(--verde-claro); }
 
-  /* ── Pedras sorteadas ── */
+  /* ── Pedras ── */
   .pedras-bar { background: var(--verde-escuro); padding: 10px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .pedras-bar .label { color: rgba(255,255,255,.7); font-size: 12px; white-space: nowrap; }
   .pedras-lista { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
@@ -46,26 +44,34 @@
 
   /* ── Modalidade ── */
   .modalidade-bar { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .modalidade-bar label { font-size: 12px; color: var(--texto-mudo); font-weight: 600; }
-  .modalidade-bar .opcoes { display: flex; gap: 10px; flex-wrap: wrap; }
+  .modalidade-bar > label { font-size: 12px; color: var(--texto-mudo); font-weight: 600; }
+  .opcoes { display: flex; gap: 10px; flex-wrap: wrap; }
   .check-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
   .check-item input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--verde-medio); }
 
   /* ── Contadores ── */
-  .contadores { display: flex; gap: 0; border-bottom: 1px solid var(--cinza-borda); background: white; }
+  .contadores { display: flex; border-bottom: 1px solid var(--cinza-borda); background: white; }
   .contador { flex: 1; text-align: center; padding: 10px 8px; border-right: 1px solid var(--cinza-borda); }
   .contador:last-child { border-right: none; }
   .contador .num { font-size: 22px; font-weight: 700; color: var(--verde-escuro); line-height: 1; }
   .contador .leg { font-size: 10px; color: var(--texto-mudo); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
   .contador.destaque .num { color: var(--laranja); }
 
+  /* ── Progresso de carregamento ── */
+  .progresso-wrap { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 10px 20px; display: none; }
+  .progresso-wrap.visivel { display: block; }
+  .progresso-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--texto-mudo); margin-bottom: 6px; }
+  .progresso-trilho { height: 8px; background: var(--cinza-borda); border-radius: 4px; overflow: hidden; }
+  .progresso-fill { height: 100%; background: linear-gradient(90deg, var(--verde-escuro), var(--verde-claro)); border-radius: 4px; transition: width .4s ease; width: 0%; }
+
   /* ── Filtros ── */
-  .filtros { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 20px; background: white; border-bottom: 1px solid var(--cinza-borda); }
+  .filtros { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 20px; background: white; border-bottom: 1px solid var(--cinza-borda); align-items: center; }
   .chip { padding: 4px 12px; border-radius: 16px; border: 1px solid var(--cinza-borda); font-size: 12px; cursor: pointer; background: white; transition: background .15s; }
   .chip.ativo { background: var(--verde-escuro); color: white; border-color: var(--verde-escuro); }
+  .filtros-direita { margin-left: auto; font-size: 12px; color: var(--texto-mudo); }
 
   /* ── Botões ── */
-  .btn { padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: opacity .15s; }
+  .btn { padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
   .btn:active { transform: scale(.97); }
   .btn-verde  { background: var(--verde-medio);  color: white; }
   .btn-verde:hover  { background: var(--verde-escuro); }
@@ -73,14 +79,14 @@
   .btn-cinza:hover  { background: #e8e8e8; }
   .btn-danger { background: var(--vermelho); color: white; }
 
-  /* ── Grade de cartelas ── */
+  /* ── Grade ── */
   .grade-wrapper { padding: 16px 20px; }
   .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
 
   .cartela { background: white; border: 2px solid var(--cinza-borda); border-radius: 10px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
   .cartela.quina { border-color: var(--amarelo); box-shadow: 0 0 0 3px rgba(255,214,0,.35); }
   .cartela.cheia { border-color: var(--laranja); box-shadow: 0 0 0 4px rgba(255,122,0,.4); animation: vibrar .4s ease; }
-  @keyframes vibrar { 0%,100% { transform: translate(0); } 25% { transform: translate(-3px); } 75% { transform: translate(3px); } }
+  @keyframes vibrar { 0%,100%{transform:translate(0)} 25%{transform:translate(-3px)} 75%{transform:translate(3px)} }
 
   .cartela-header { background: var(--verde-escuro); color: white; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; }
   .cartela-nome { font-size: 12px; font-weight: 600; }
@@ -89,19 +95,12 @@
   .badge-quina { background: var(--amarelo); color: #5a4000; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px; }
   .badge-cheia { background: var(--laranja); color: white;   font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px; }
 
-  .cartela-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 6px; }
+  .cartela-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 2px; padding: 6px; }
   .header-col { text-align: center; font-size: 11px; font-weight: 700; color: var(--verde-medio); padding: 3px 0; letter-spacing: 1px; }
   .celula { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border-radius: 4px; background: var(--cinza-fundo); color: var(--texto); transition: background .3s, color .3s; }
   .celula.marcada { background: var(--verde-medio); color: white; }
   .celula.free { background: #e8f5d0; color: var(--verde-medio); font-size: 9px; font-weight: 400; text-transform: uppercase; }
   .celula.free.marcada { background: var(--verde-escuro); color: var(--verde-claro); }
-
-  /* ── Progresso de carregamento ── */
-  .progresso-bar { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 10px 20px; display: none; }
-  .progresso-bar.visivel { display: block; }
-  .progresso-texto { font-size: 12px; color: var(--texto-mudo); margin-bottom: 6px; }
-  .progresso-trilho { height: 6px; background: var(--cinza-borda); border-radius: 3px; overflow: hidden; }
-  .progresso-fill { height: 100%; background: var(--verde-medio); border-radius: 3px; transition: width .3s; width: 0%; }
 
   /* ── Estados ── */
   .estado-vazio { text-align: center; padding: 48px 20px; color: var(--texto-mudo); }
@@ -114,7 +113,7 @@
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 999; align-items: center; justify-content: center; }
   .overlay.ativo { display: flex; }
   .modal { background: white; border-radius: 16px; padding: 32px 40px; text-align: center; max-width: 380px; width: 90%; animation: entrar .3s cubic-bezier(.22,1,.36,1); }
-  @keyframes entrar { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes entrar { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
   .modal .emoji { font-size: 56px; margin-bottom: 12px; }
   .modal h2 { font-size: 22px; font-weight: 700; color: var(--verde-escuro); margin-bottom: 6px; }
   .modal .cartela-info { font-size: 14px; color: var(--texto-mudo); margin-bottom: 20px; }
@@ -132,7 +131,7 @@
     <h1>🎱 Verificador de Cartelas</h1>
     <div class="sub">Bingo — Quermesse Paróquia Sagrado Coração de Jesus · Marília-SP</div>
   </div>
-  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn btn-verde" onclick="carregarCartelas()">⬇️ Carregar cartelas</button>
     <button class="btn btn-cinza" onclick="limparTudo()">🗑️ Limpar</button>
     <div class="status-canal">
@@ -142,7 +141,6 @@
   </div>
 </header>
 
-<!-- Pedras sorteadas -->
 <div class="pedras-bar">
   <span class="label">Pedras sorteadas:</span>
   <div class="pedras-lista" id="pedras-lista">
@@ -151,7 +149,6 @@
   <span style="color:rgba(255,255,255,.6);font-size:11px;" id="total-pedras">0 pedras</span>
 </div>
 
-<!-- Input manual -->
 <div class="input-manual">
   <label>Adicionar pedra manualmente (1–75):</label>
   <input type="number" id="pedra-manual" min="1" max="75" placeholder="1–75">
@@ -160,7 +157,6 @@
   <button class="btn btn-cinza" onclick="resetarPedras()" style="margin-left:auto">🔄 Resetar rodada</button>
 </div>
 
-<!-- Modalidade -->
 <div class="modalidade-bar">
   <label>Prêmios desta rodada:</label>
   <div class="opcoes">
@@ -171,7 +167,6 @@
   <span style="font-size:12px;color:var(--texto-mudo);margin-left:8px">+ Cartela cheia (sempre ativa)</span>
 </div>
 
-<!-- Contadores -->
 <div class="contadores">
   <div class="contador"><div class="num" id="cnt-cartelas">0</div><div class="leg">Cartelas</div></div>
   <div class="contador destaque"><div class="num" id="cnt-quina">0</div><div class="leg">Quinas</div></div>
@@ -179,21 +174,23 @@
   <div class="contador"><div class="num" id="cnt-pedras">0</div><div class="leg">Pedras</div></div>
 </div>
 
-<!-- Filtros -->
+<!-- Barra de progresso do carregamento em lotes -->
+<div class="progresso-wrap" id="progresso-wrap">
+  <div class="progresso-info">
+    <span id="prog-texto">Carregando…</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progresso-trilho"><div class="progresso-fill" id="prog-fill"></div></div>
+</div>
+
 <div class="filtros">
   <div class="chip ativo" data-filtro="todas" onclick="filtrar(this)">Todas</div>
   <div class="chip" data-filtro="quina"  onclick="filtrar(this)">Com quina</div>
   <div class="chip" data-filtro="cheia"  onclick="filtrar(this)">Cartela cheia</div>
   <div class="chip" data-filtro="sem"    onclick="filtrar(this)">Sem prêmio</div>
+  <span class="filtros-direita" id="info-paginas"></span>
 </div>
 
-<!-- Barra de progresso do carregamento -->
-<div class="progresso-bar" id="progresso-bar">
-  <div class="progresso-texto" id="progresso-texto">Carregando cartelas…</div>
-  <div class="progresso-trilho"><div class="progresso-fill" id="progresso-fill"></div></div>
-</div>
-
-<!-- Grade -->
 <div class="grade-wrapper">
   <div class="grade" id="grade">
     <div class="estado-vazio">
@@ -203,7 +200,6 @@
   </div>
 </div>
 
-<!-- Modal ganhador -->
 <div class="overlay" id="overlay" onclick="fecharModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="emoji" id="modal-emoji">🎉</div>
@@ -215,25 +211,27 @@
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════════════
-   CONFIGURAÇÃO
-══════════════════════════════════════════════════════════════ */
-var API = 'https://script.google.com/macros/s/AKfycbwbd7GLYGlDMO_NqVAEPysl7HkJBwG3WuAty9-uWn_7o7NDvr8SAfr5IlE4aHk4gSLfJA/exec';
+/* ══════════════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════════════ */
+var API    = 'https://script.google.com/macros/s/AKfycbwbd7GLYGlDMO_NqVAEPysl7HkJBwG3WuAty9-uWn_7o7NDvr8SAfr5IlE4aHk4gSLfJA/exec';
+var LIMITE = 200;   // cartelas por página — ajuste conforme necessário
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    ESTADO
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 var pedrasSorteadas = new Set();
-var cartelas        = [];          // cartelas com grade completa
+var cartelas        = [];
 var filtroAtivo     = 'todas';
 var alertasFila     = [];
 var alertandoAgora  = false;
+var carregando      = false;
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    JSONP
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function jsonp(url, cb) {
-  var id  = '_cb' + Date.now() + (Math.random()*9999|0);
+  var id  = '_cb' + Date.now() + (Math.random() * 9999 | 0);
   var tag = document.createElement('script');
   window[id] = function(data) {
     try { delete window[id]; } catch(e) { window[id] = void 0; }
@@ -243,41 +241,68 @@ function jsonp(url, cb) {
   tag.onerror = function() {
     try { delete window[id]; } catch(e) { window[id] = void 0; }
     tag.parentNode && tag.parentNode.removeChild(tag);
-    cb(new Error('net'));
+    cb(new Error('Erro de rede'));
   };
   tag.src = url + '&callback=' + id + '&_=' + Date.now();
   document.head.appendChild(tag);
 }
 
-/* ══════════════════════════════════════════════════════════════
-   CARREGAR CARTELAS
-   Estratégia: primeiro busca a lista (IDs), depois busca
-   cada cartela individualmente via buscarCartela (que tem grade).
-══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   PROGRESSO
+══════════════════════════════════════════════════════ */
+function mostrarProgresso(texto, pct) {
+  document.getElementById('progresso-wrap').classList.add('visivel');
+  document.getElementById('prog-texto').textContent = texto;
+  document.getElementById('prog-pct').textContent   = pct + '%';
+  document.getElementById('prog-fill').style.width  = pct + '%';
+}
+function esconderProgresso() {
+  document.getElementById('progresso-wrap').classList.remove('visivel');
+}
+
+/* ══════════════════════════════════════════════════════
+   CARREGAR CARTELAS — paginação automática
+   Carrega página 1 imediatamente, depois continua
+   buscando as próximas em background.
+══════════════════════════════════════════════════════ */
 function carregarCartelas() {
-  var gradeEl = document.getElementById('grade');
-  gradeEl.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando cartelas…</div>';
-  mostrarProgresso('Buscando cartelas…', 0);
+  if (carregando) return;
+  carregando = true;
+  cartelas   = [];
 
-  /* Uma única chamada — listarCartelas agora retorna grade completa */
-  jsonp(API + '?acao=listarCartelas', function(err, data) {
-    esconderProgresso();
+  document.getElementById('grade').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Carregando cartelas…</div>';
+  document.getElementById('info-paginas').textContent = '';
+  mostrarProgresso('Buscando página 1…', 0);
 
+  buscarPagina(1);
+}
+
+function buscarPagina(pagina) {
+  var url = API + '?acao=listarCartelas&pagina=' + pagina + '&limite=' + LIMITE;
+
+  jsonp(url, function(err, data) {
     if (err || !data || !data.sucesso) {
-      gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">❌</div>' +
+      carregando = false;
+      esconderProgresso();
+      document.getElementById('grade').innerHTML =
+        '<div class="estado-vazio"><div class="icon">❌</div>' +
         '<p>Erro ao carregar cartelas.</p>' +
-        '<p style="font-size:12px;margin-top:8px;">' + (err ? err.message : (data && data.dados && data.dados.mensagem) || 'Verifique a conexão.') + '</p></div>';
+        '<p style="font-size:12px;margin-top:8px">' +
+        (err ? err.message : (data && data.dados && data.dados.mensagem) || 'Verifique a conexão.') +
+        '</p></div>';
       return;
     }
 
-    var lista = (data.dados && data.dados.cartelas) ? data.dados.cartelas : [];
-    if (!lista.length) {
-      gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">📭</div><p>Nenhuma cartela encontrada na planilha.</p></div>';
-      return;
-    }
+    var d            = data.dados;
+    var lote         = d.cartelas || [];
+    var totalPaginas = d.totalPaginas || 1;
+    var totalGeral   = d.totalCartelas || lote.length;
+    var temProxima   = d.temProxima || false;
 
-    cartelas = lista.map(function(c) {
-      return {
+    /* Acumula cartelas */
+    lote.forEach(function(c) {
+      cartelas.push({
         id:              c.id,
         nome:            c.comprador || '',
         telefone:        c.telefone  || '',
@@ -288,34 +313,42 @@ function carregarCartelas() {
         _marcadas:       [],
         _temQuina:       false,
         _temCheia:       false
-      };
+      });
     });
 
-    /* Ordena por id */
+    /* Atualiza progresso */
+    var pct = Math.round((pagina / totalPaginas) * 100);
+    mostrarProgresso(
+      'Carregando… ' + cartelas.length + ' de ' + totalGeral + ' cartelas',
+      pct
+    );
+
+    /* Renderiza parcial a cada página — já funciona enquanto carrega */
     cartelas.sort(function(a, b) { return a.id - b.id; });
     verificarCartelas();
     atualizarContadores();
+
+    document.getElementById('info-paginas').textContent =
+      cartelas.length + ' de ' + totalGeral + ' cartelas carregadas';
+
+    if (temProxima) {
+      /* Pequeno delay para não travar o browser */
+      setTimeout(function() { buscarPagina(pagina + 1); }, 300);
+    } else {
+      /* Fim — todas as páginas carregadas */
+      carregando = false;
+      esconderProgresso();
+      document.getElementById('info-paginas').textContent =
+        cartelas.length + ' cartelas carregadas';
+    }
   });
 }
 
-/* ══════════════════════════════════════════════════════════════
-   PROGRESSO
-══════════════════════════════════════════════════════════════ */
-function mostrarProgresso(texto, pct) {
-  document.getElementById('progresso-bar').classList.add('visivel');
-  document.getElementById('progresso-texto').textContent = texto;
-  document.getElementById('progresso-fill').style.width  = pct + '%';
-}
-function esconderProgresso() {
-  document.getElementById('progresso-bar').classList.remove('visivel');
-}
-
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PEDRAS
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function registrarPedra(num, animada) {
-  if (num < 1 || num > 75) return;
-  if (pedrasSorteadas.has(num)) return;
+  if (num < 1 || num > 75 || pedrasSorteadas.has(num)) return;
   pedrasSorteadas.add(num);
   renderizarPedras(animada ? num : null);
   verificarCartelas();
@@ -338,8 +371,8 @@ function removerUltimaPedra() {
   var arr = Array.from(pedrasSorteadas);
   if (!arr.length) return;
   pedrasSorteadas.delete(arr[arr.length - 1]);
-  renderizarPedras(null);
   recalcularAlertas();
+  renderizarPedras(null);
   verificarCartelas();
   atualizarContadores();
 }
@@ -368,12 +401,13 @@ function renderizarPedras(novaNum) {
   lista.innerHTML = arr.map(function(n) {
     return '<span class="pedra-badge' + (n === novaNum ? ' nova' : '') + '">' + n + '</span>';
   }).join('');
-  document.getElementById('total-pedras').textContent = arr.length + ' pedra' + (arr.length !== 1 ? 's' : '');
+  document.getElementById('total-pedras').textContent =
+    arr.length + ' pedra' + (arr.length !== 1 ? 's' : '');
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    VERIFICAÇÃO
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function modalidadesAtivas() {
   return {
     linha:    document.getElementById('mod-linha').checked,
@@ -389,16 +423,14 @@ function verificarCartelas() {
     var g = cartela.grade;
     if (!g || !g.length) return;
 
-    /* Monta array flat de marcadas */
     var marcadas = [];
-    for (var r = 0; r < 5; r++) {
+    for (var r = 0; r < 5; r++)
       for (var c = 0; c < 5; c++) {
         var val = g[r] ? g[r][c] : undefined;
         marcadas.push(val === null || val === undefined || pedrasSorteadas.has(Number(val)));
       }
-    }
 
-    var m = function(r, c) { return marcadas[r * 5 + c]; };
+    var m        = function(r, c) { return marcadas[r * 5 + c]; };
     var temCheia = marcadas.every(Boolean);
     var temQuina = false;
 
@@ -412,13 +444,11 @@ function verificarCartelas() {
       if ([0,1,2,3,4].every(function(i) { return m(i,i);   })) temQuina = true;
       if ([0,1,2,3,4].every(function(i) { return m(i,4-i); })) temQuina = true;
     }
-    if (!temQuina && mod.cantos) {
+    if (!temQuina && mod.cantos)
       if (m(0,0) && m(0,4) && m(4,0) && m(4,4)) temQuina = true;
-    }
 
     if (temCheia && !cartela.cheiaJaAlertada) {
-      cartela.cheiaJaAlertada = true;
-      cartela.quinaJaAlertada = true;
+      cartela.cheiaJaAlertada = true; cartela.quinaJaAlertada = true;
       agendarAlerta(cartela, 'cheia');
     } else if (temQuina && !cartela.quinaJaAlertada) {
       cartela.quinaJaAlertada = true;
@@ -433,76 +463,57 @@ function verificarCartelas() {
   renderizarCartelas();
 }
 
-/* ══════════════════════════════════════════════════════════════
-   RENDERIZAR CARTELAS
-══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   RENDERIZAR
+══════════════════════════════════════════════════════ */
 function renderizarCartelas() {
   var gradeEl = document.getElementById('grade');
-
   if (!cartelas.length) {
     gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">📋</div><p>Clique em "Carregar cartelas" para buscar do Google Sheets.</p></div>';
     return;
   }
-
-  var lista = filtroAtivo === 'quina'  ? cartelas.filter(function(c) { return c._temQuina && !c._temCheia; })
-            : filtroAtivo === 'cheia'  ? cartelas.filter(function(c) { return c._temCheia; })
-            : filtroAtivo === 'sem'    ? cartelas.filter(function(c) { return !c._temQuina && !c._temCheia; })
+  var lista = filtroAtivo === 'quina' ? cartelas.filter(function(c) { return c._temQuina && !c._temCheia; })
+            : filtroAtivo === 'cheia' ? cartelas.filter(function(c) { return c._temCheia; })
+            : filtroAtivo === 'sem'   ? cartelas.filter(function(c) { return !c._temQuina && !c._temCheia; })
             : cartelas;
-
   if (!lista.length) {
     gradeEl.innerHTML = '<div class="estado-vazio"><div class="icon">🔍</div><p>Nenhuma cartela corresponde ao filtro.</p></div>';
     return;
   }
-
   gradeEl.innerHTML = lista.map(renderCartela).join('');
 }
 
 function renderCartela(c) {
-  var g       = c.grade   || [];
-  var marcadas = c._marcadas || [];
-  var celulas = '';
-  var idx     = 0;
-
-  for (var r = 0; r < 5; r++) {
+  var g = c.grade || [], marcadas = c._marcadas || [], celulas = '', idx = 0;
+  for (var r = 0; r < 5; r++)
     for (var col = 0; col < 5; col++) {
-      var val    = g[r] ? g[r][col] : null;
+      var val = g[r] ? g[r][col] : null;
       var isFree = val === null || val === undefined;
       var marc   = marcadas[idx] || false;
-      if (isFree) {
-        celulas += '<div class="celula free' + (marc ? ' marcada' : '') + '">FREE</div>';
-      } else {
-        celulas += '<div class="celula' + (marc ? ' marcada' : '') + '">' + val + '</div>';
-      }
+      celulas += isFree
+        ? '<div class="celula free' + (marc ? ' marcada' : '') + '">FREE</div>'
+        : '<div class="celula'     + (marc ? ' marcada' : '') + '">' + val + '</div>';
       idx++;
     }
-  }
-
-  var badges     = (c._temCheia ? '<span class="badge-cheia">CHEIA</span>' : '') +
-                   (c._temQuina && !c._temCheia ? '<span class="badge-quina">QUINA</span>' : '');
-  var classeExtra = c._temCheia ? 'cheia' : c._temQuina ? 'quina' : '';
-
-  return '<div class="cartela ' + classeExtra + '">' +
+  var badges = (c._temCheia ? '<span class="badge-cheia">CHEIA</span>' : '') +
+               (c._temQuina && !c._temCheia ? '<span class="badge-quina">QUINA</span>' : '');
+  var cls = c._temCheia ? 'cheia' : c._temQuina ? 'quina' : '';
+  return '<div class="cartela ' + cls + '">' +
     '<div class="cartela-header">' +
-      '<div>' +
-        '<div class="cartela-nome">' + (c.nome || 'Sem comprador') + '</div>' +
-        '<div class="cartela-id">#' + c.id + '</div>' +
-      '</div>' +
+      '<div><div class="cartela-nome">' + (c.nome || 'Sem comprador') + '</div>' +
+      '<div class="cartela-id">#' + c.id + '</div></div>' +
       '<div class="cartela-badges">' + badges + '</div>' +
     '</div>' +
     '<div class="cartela-grid">' +
-      '<div class="header-col">B</div>' +
-      '<div class="header-col">I</div>' +
-      '<div class="header-col">N</div>' +
-      '<div class="header-col">G</div>' +
-      '<div class="header-col">O</div>' +
-      celulas +
-    '</div>' +
-  '</div>';
+      '<div class="header-col">B</div><div class="header-col">I</div>' +
+      '<div class="header-col">N</div><div class="header-col">G</div>' +
+      '<div class="header-col">O</div>' + celulas +
+    '</div></div>';
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    CONTADORES & FILTROS
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function atualizarContadores() {
   document.getElementById('cnt-cartelas').textContent = cartelas.length;
   document.getElementById('cnt-quina').textContent    = cartelas.filter(function(c) { return c._temQuina && !c._temCheia; }).length;
@@ -517,9 +528,9 @@ function filtrar(el) {
   renderizarCartelas();
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    ALERTAS / MODAL
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function agendarAlerta(cartela, tipo) {
   alertasFila.push({ cartela: cartela, tipo: tipo });
   if (!alertandoAgora) mostrarProximoAlerta();
@@ -528,30 +539,24 @@ function agendarAlerta(cartela, tipo) {
 function mostrarProximoAlerta() {
   if (!alertasFila.length) { alertandoAgora = false; return; }
   alertandoAgora = true;
-  var item    = alertasFila.shift();
-  var cartela = item.cartela;
-  var isCheia = item.tipo === 'cheia';
-
-  document.getElementById('modal-emoji').textContent   = isCheia ? '🏆' : '⭐';
-  document.getElementById('modal-titulo').textContent  = isCheia ? 'CARTELA CHEIA!' : 'QUINA!';
-  document.getElementById('modal-badge').textContent   = isCheia ? 'Cartela Cheia' : 'Quina';
-  document.getElementById('modal-badge').className     = 'tipo-badge ' + (isCheia ? 'tipo-cheia' : 'tipo-quina');
-  document.getElementById('modal-info').textContent    = '#' + cartela.id + (cartela.nome ? ' — ' + cartela.nome : '');
+  var item = alertasFila.shift(), isCheia = item.tipo === 'cheia', c = item.cartela;
+  document.getElementById('modal-emoji').textContent  = isCheia ? '🏆' : '⭐';
+  document.getElementById('modal-titulo').textContent = isCheia ? 'CARTELA CHEIA!' : 'QUINA!';
+  document.getElementById('modal-badge').textContent  = isCheia ? 'Cartela Cheia' : 'Quina';
+  document.getElementById('modal-badge').className    = 'tipo-badge ' + (isCheia ? 'tipo-cheia' : 'tipo-quina');
+  document.getElementById('modal-info').textContent   = '#' + c.id + (c.nome ? ' — ' + c.nome : '');
   document.getElementById('overlay').classList.add('ativo');
-
   try {
-    var ctx   = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
     var notas = isCheia ? [523,659,784,1047,1319] : [523,659,784];
     notas.forEach(function(freq, i) {
-      var osc  = ctx.createOscillator();
-      var gain = ctx.createGain();
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
       osc.frequency.value = freq; osc.type = 'sine';
-      gain.gain.setValueAtTime(0, ctx.currentTime + i * .18);
-      gain.gain.linearRampToValueAtTime(.3, ctx.currentTime + i * .18 + .05);
-      gain.gain.linearRampToValueAtTime(0,  ctx.currentTime + i * .18 + .15);
-      osc.start(ctx.currentTime + i * .18);
-      osc.stop(ctx.currentTime  + i * .18 + .2);
+      gain.gain.setValueAtTime(0, ctx.currentTime + i*.18);
+      gain.gain.linearRampToValueAtTime(.3, ctx.currentTime + i*.18+.05);
+      gain.gain.linearRampToValueAtTime(0,  ctx.currentTime + i*.18+.15);
+      osc.start(ctx.currentTime + i*.18); osc.stop(ctx.currentTime + i*.18+.2);
     });
   } catch(ignore) {}
 }
@@ -561,35 +566,31 @@ function fecharModal() {
   setTimeout(mostrarProximoAlerta, 300);
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    LIMPAR
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function limparTudo() {
   if (!confirm('Limpar todas as cartelas e pedras?')) return;
-  cartelas = [];
-  pedrasSorteadas.clear();
-  renderizarPedras(null);
-  renderizarCartelas();
-  atualizarContadores();
+  cartelas = []; pedrasSorteadas.clear();
+  renderizarPedras(null); renderizarCartelas(); atualizarContadores();
+  document.getElementById('info-paginas').textContent = '';
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    BROADCASTCHANNEL
-══════════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function iniciarCanal() {
   try {
     var canal = new BroadcastChannel('bingo-canal');
     canal.onmessage = function(e) {
-      var d = e && e.data;
-      if (!d) return;
+      var d = e && e.data; if (!d) return;
       if (d.tipo === 'draw') {
-        var novas = (d.payload && d.payload.called) ? d.payload.called : [];
-        novas.forEach(function(n) { pedrasSorteadas.add(n); });
+        ((d.payload && d.payload.called) || []).forEach(function(n) { pedrasSorteadas.add(n); });
         renderizarPedras(d.payload && d.payload.num || null);
         verificarCartelas(); atualizarContadores();
       }
       if (d.tipo === 'undo') {
-        pedrasSorteadas = new Set((d.payload && d.payload.called) ? d.payload.called : []);
+        pedrasSorteadas = new Set((d.payload && d.payload.called) || []);
         recalcularAlertas(); renderizarPedras(null);
         verificarCartelas(); atualizarContadores();
       }
@@ -602,12 +603,10 @@ function iniciarCanal() {
   }
 }
 
-/* ── Enter no input manual ── */
 document.getElementById('pedra-manual').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') adicionarPedraManual();
 });
 
-/* ── Init ── */
 iniciarCanal();
 atualizarContadores();
 renderizarPedras(null);
