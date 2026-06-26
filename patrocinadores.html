@@ -355,25 +355,10 @@ function startBgCycle() {
   filtrando apenas as imagens que realmente existem no servidor.
 */
 function loadFundos() {
-  /* A API de fundos não está implementada — usa caminhos locais direto.
-     Testa cada imagem antes de adicionar à lista (evita 404 silencioso). */
-  var valid = [];
-  var total = FUNDOS_LOCAL.length;
-  var done  = 0;
-
-  FUNDOS_LOCAL.forEach(function(f) {
-    testImg(f.caminho, function(ok) {
-      if (ok) valid.push(f);
-      done++;
-      if (done === total) {
-        if (valid.length) {
-          state.fundos = valid;
-          applyBg(state.fundos[0].caminho, state.fundos[0].nome);
-          startBgCycle();
-        }
-      }
-    });
-  });
+  /* Carrega direto dos caminhos locais — sem chamada à API */
+  state.fundos = FUNDOS_LOCAL;
+  applyBg(state.fundos[0].caminho, state.fundos[0].nome);
+  startBgCycle();
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -410,7 +395,7 @@ function render() {
   void el.card.offsetWidth;
   el.card.classList.add(FX[state.patIdx % FX.length]);
 
-  el.badge.textContent = String(sp.num) === '0' ? 'Coringa' : 'Pedra ' + sp.num;
+  el.badge.textContent = sp.num;
 
   el.status.style.display = 'none';
 
