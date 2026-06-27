@@ -437,6 +437,47 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
           </button>
           <div class="feedback" id="fbPatroc"></div>
         </div>
+      <!-- ════ PAINEL PATROCÍNIOS ════ -->
+      <div class="panel" id="panel-patrocinios">
+        ...conteúdo existente...
+      </div>
+
+      <!-- ════ PAINEL VÍDEOS ════ -->
+      <div class="panel" id="panel-videos">
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-player-play"></i> Vídeos disponíveis</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="vidCarregar()">
+              <i class="ti ti-refresh"></i> Atualizar lista
+            </button>
+            <a href="video.html" target="_blank" class="btn btn-blue btn-sm">
+              <i class="ti ti-external-link"></i> Abrir tela de vídeo
+            </a>
+            <button class="btn btn-ghost btn-sm" onclick="vidParar()">
+              <i class="ti ti-player-stop"></i> Parar vídeo
+            </button>
+            <span style="font-size:11px;color:#555;margin-left:auto" id="vidStatus"></span>
+          </div>
+          <div id="vidLista">
+            <div style="color:#555;font-size:13px;padding:16px;text-align:center">
+              Clique em "Atualizar lista" para carregar os vídeos da planilha.
+            </div>
+          </div>
+          <div class="feedback" id="fbVideos"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-info-circle"></i> Como adicionar vídeos</div>
+          <div style="font-size:12px;color:#888;line-height:1.8">
+            1. Abra a aba <strong style="color:#ccc">Videos</strong> na planilha Google Sheets<br>
+            2. Adicione uma linha: <strong style="color:#ccc">id · titulo · url_youtube · SIM</strong><br>
+            3. Cole a URL completa do YouTube (ex: https://youtu.be/xxxxx)<br>
+            4. Clique em "Atualizar lista" no painel<br>
+            5. Clique em ▶ para enviar ao telão
+          </div>
+        </div>
+
       </div>
 
     </div><!-- /content -->
