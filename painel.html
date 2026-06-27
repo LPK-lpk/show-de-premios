@@ -486,6 +486,63 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 
 <script>
 /* ══════════════════════════════════════════════════════════
+   VÍDEOS
+══════════════════════════════════════════════════════════ */
+var _vid = { lista: [] };
+
+function vidCarregar() {
+  if (!scriptUrl) { fb('fbVideos','err','Configure a URL do Apps Script nas configurações.'); return; }
+  document.getElementById('vidStatus').textContent = 'Carregando…';
+  document.getElementById('vidLista').innerHTML =
+    '<div style="color:#555;font-size:13px;padding:16px;text-align:center">Carregando…</div>';
+  _scJsonp(scriptUrl + '?acao=listarVideos', function(err, data) {
+    if (err || !data || !data.sucesso) {
+      document.getElementById('vidStatus').textContent = 'Erro ao carregar.';
+      fb('fbVideos','err','Erro ao carregar vídeos da planilha.');
+      return;
+    }
+    _vid.lista = data.dados.videos || [];
+    document.getElementById('vidStatus').textContent = _vid.lista.length + ' vídeo(s)';
+    vidRenderLista();
+  });
+}
+
+function vidRenderLista() {
+  var el = document.getElementById('vidLista');
+  if (!_vid.lista.length) {
+    el.innerHTML = '<div style="color:#555;font-size:13px;padding:16px;text-align:center">Nenhum vídeo ativo na planilha.</div>';
+    return;
+  }
+  el.innerHTML = _vid.lista.map(function(v) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #222">' +
+      '<div style="width:80px;height:45px;background:#111;border-radius:6px;overflow:hidden;flex-shrink:0">' +
+        '<img src="https://img.youtube.com/vi/' + v.videoId + '/mqdefault.jpg" ' +
+          'style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">' +
+      '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:600;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + v.titulo + '</div>' +
+        '<div style="font-size:11px;color:#555;margin-top:2px">ID: ' + v.videoId + '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="vidEnviar(\'' + v.videoId + '\',\'' + v.titulo.replace(/'/g,"\\'") + '\')">' +
+        '<i class="ti ti-player-play"></i> Enviar' +
+      '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function vidEnviar(videoId, titulo) {
+  if (typeof CANAL === 'undefined') { fb('fbVideos','err','Canal BroadcastChannel não disponível.'); return; }
+  CANAL.postMessage({ tipo: 'play_video', payload: { videoId: videoId, titulo: titulo } });
+  fb('fbVideos','ok','▶ "' + titulo + '" enviado para o telão!');
+}
+
+function vidParar() {
+  if (typeof CANAL === 'undefined') return;
+  CANAL.postMessage({ tipo: 'parar_video', payload: {} });
+  fb('fbVideos','ok','⏹ Vídeo parado no telão.');
+}
+
+/* ══════════════════════════════════════════════════════════
    CONSTANTES
 ══════════════════════════════════════════════════════════ */
 const CANAL        = new BroadcastChannel('bingo-canal');
