@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vídeos — Show de Prêmios</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+
+  /* ── Tela de espera ── */
+  .espera {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3vh;
+    background: #000;
+    transition: opacity .6s ease;
+  }
+  .espera.oculta { opacity: 0; pointer-events: none; }
+  .espera-logo { font-size: 8vh; }
+  .espera-titulo {
+    font-size: clamp(18px, 3.5vh, 48px);
+    font-weight: 700; color: #fff; text-align: center;
+    text-shadow: 0 2px 12px rgba(0,0,0,.6);
+  }
+  .espera-sub { font-size: clamp(12px, 2vh, 24px); color: #555; }
+
+  /* ── Player ── */
+  #player-wrap {
+    position: fixed; inset: 0; z-index: 5;
+    background: #000; display: none;
+  }
+  #player-wrap.show { display: block; }
+  #yt-player {
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  /* ── Overlay de título (aparece no início) ── */
+  .titulo-overlay {
+    position: fixed; bottom: 6vh; left: 0; right: 0; z-index: 20;
+    text-align: center; pointer-events: none;
+    opacity: 0; transition: opacity .5s;
+  }
+  .titulo-overlay.show { opacity: 1; }
+  .titulo-overlay .titulo-box {
+    display: inline-block;
+    background: rgba(0,0,0,.72);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px; padding: 10px 28px;
+    font-size: clamp(14px, 2.8vh, 36px);
+    font-weight: 700; color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,.8);
+    backdrop-filter: blur(6px);
+  }
+</style>
+</head>
+<body>
+
+<!-- Tela de espera -->
+<div class="espera" id="espera">
+  <div class="espera-logo">🎬</div>
+  <div class="espera-titulo">Aguardando vídeo…</div>
+  <div class="espera-sub">O operador selecionará o vídeo pelo painel</div>
+</div>
+
+<!-- Player YouTube -->
+<div id="player-wrap">
+  <iframe id="yt-player" allowfullscreen
+    allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture">
+  </iframe>
+</div>
+
+<!-- Overlay de título -->
+<div class="titulo-overlay" id="titulo-overlay">
+  <div class="titulo-box" id="titulo-texto"></div>
+</div>
+
+<script>
+var CANAL_NOME = 'bingo-canal';
+var tituloTimer = null;
+
+/* ── BroadcastChannel ── */
+try {
+  var canal = new BroadcastChannel(CANAL_NOME);
+  canal.onmessage = function(e) {
+    var d = e && e.data;
+    if (!d) return;
+
+    if (d.tipo === 'play_video') {
+      tocarVideo(d.payload.videoId, d.payload.titulo || '');
+    }
+    if (d.tipo === 'parar_video') {
+      pararVideo();
+    }
+  };
+} catch(err) {
+  console.warn('BroadcastChannel indisponível');
+}
+
+/* ── Tocar vídeo ── */
+function tocarVideo(videoId, titulo) {
+  if (!videoId) return;
+
+  /* Monta URL de embed com autoplay e som */
+  var src = 'https://www.youtube.com/embed/' + videoId
+    + '?autoplay=1&controls=1&rel=0&modestbranding=1&enablejsapi=0';
+
+  document.getElementById('yt-player').src = src;
+  document.getElementById('player-wrap').classList.add('show');
+  document.getElementById('espera').classList.add('oculta');
+
+  /* Mostra título por 5 segundos */
+  if (titulo) {
+    var ov = document.getElementById('titulo-overlay');
+    document.getElementById('titulo-texto').textContent = titulo;
+    ov.classList.add('show');
+    clearTimeout(tituloTimer);
+    tituloTimer = setTimeout(function() { ov.classList.remove('show'); }, 5000);
+  }
+}
+
+/* ── Parar vídeo ── */
+function pararVideo() {
+  document.getElementById('yt-player').src = '';
+  document.getElementById('player-wrap').classList.remove('show');
+  document.getElementById('espera').classList.remove('oculta');
+  document.getElementById('titulo-overlay').classList.remove('show');
+}
+
+/* ── Tecla F — fullscreen ── */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'f' || e.key === 'F') {
+    if (!document.fullscreenElement)
+      document.documentElement.requestFullscreen().catch(function(){});
+  }
+  if (e.key === 'Escape') pararVideo();
+});
+</script>
+</body>
+</html>
