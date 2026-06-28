@@ -398,6 +398,11 @@ function render() {
   void el.card.offsetWidth;
   el.card.classList.add(FX[state.patIdx % FX.length]);
 
+  var FONTES = ["'Montserrat',sans-serif","'Oswald',sans-serif","'Anton',sans-serif","'Bebas Neue',sans-serif","'Rajdhani',sans-serif","'Barlow Condensed',sans-serif"];
+  var fonte = FONTES[state.patIdx % FONTES.length];
+  el.name.style.fontFamily = fonte;
+  el.phone.style.fontFamily = fonte;
+  el.msg.style.fontFamily = fonte;
   el.badge.textContent = sp.num;
   el.status.style.display = 'none';
 
