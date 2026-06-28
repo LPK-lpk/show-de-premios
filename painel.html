@@ -1070,12 +1070,23 @@ function carregarPatrocinadores(){
   return new Promise(function(resolve){
     var cbName = '_bingo_patroc_' + Date.now();
     var script = document.createElement('script');
-
     window[cbName] = function(data){
       delete window[cbName];
       if(script.parentNode) script.parentNode.removeChild(script);
-      if(data.sucesso && Array.isArray(data.patrocinios)){
-        sponsors = data.patrocinios;
+      var lista = [];
+      if(data.sucesso && data.dados && Array.isArray(data.dados.patrocinadores))
+        lista = data.dados.patrocinadores;
+      else if(data.sucesso && Array.isArray(data.patrocinios))
+        lista = data.patrocinios;
+      if(lista.length){
+        sponsors = lista.map(function(r){
+          return {
+            num:      r.id      !== undefined ? r.id      : r.num,
+            name:     r.nome    || r.name     || '',
+            phone:    r.telefone|| r.phone    || '',
+            mensagem: r.mensagem|| r.msg      || ''
+          };
+        });
         ls(LS_SPONSORS, JSON.stringify(sponsors));
         renderSponsorList();
       } else {
@@ -1083,14 +1094,12 @@ function carregarPatrocinadores(){
       }
       resolve();
     };
-
     script.onerror = function(){
       delete window[cbName];
       if(script.parentNode) script.parentNode.removeChild(script);
       console.warn('Erro ao carregar patrocinadores via JSONP');
       resolve();
     };
-
     script.src = SCRIPT_PATROC + '?acao=listarPatrocinios&callback=' + cbName + '&_=' + Date.now();
     document.head.appendChild(script);
   });
