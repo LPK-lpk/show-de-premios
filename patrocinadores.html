@@ -84,40 +84,39 @@
     line-height: .95; font-weight: 900; color: #fff;
     font-family: inherit;
     text-transform: uppercase;
-    text-wrap: balance; letter-spacing: .01em;
-    -webkit-text-stroke: clamp(2px,.5vh,8px) var(--outline);
+    text-wrap: balance; letter-spacing: .04em;
+    -webkit-text-stroke: clamp(1px,.2vh,3px) rgba(255,255,255,.3);
     paint-order: stroke fill;
     text-shadow:
-      .055em  .055em 0 var(--shadow-main),
-      -.04em -.04em  0 var(--shadow-alt),
-      .09em  -.035em 0 var(--shadow-soft),
-      0 .08em 0 rgba(0,0,0,.6),
-      0 .24em .28em rgba(0,0,0,.45);
+      0 0 .08em rgba(255,255,255,.9),
+      0 0 .22em rgba(255,255,255,.5),
+      0 0 .45em var(--shadow-main),
+      0 0 .9em  var(--shadow-main),
+      0 .06em .15em rgba(0,0,0,.5);
   }
  
   .sp-phone {
     font-size: clamp(24px, 4.4vh, 68px);
-    color: #fff; font-weight: 900;
-    -webkit-text-stroke: clamp(1px,.22vh,4px) var(--outline);
+    color: #fff; font-weight: 700;
+    font-family: inherit;
+    -webkit-text-stroke: clamp(1px,.1vh,2px) rgba(255,255,255,.2);
     paint-order: stroke fill;
     text-shadow:
-      .055em  .055em 0 var(--shadow-alt),
-      -.038em -.038em 0 var(--shadow-main),
-      .078em  -.028em 0 var(--shadow-soft),
-      0 .14em .22em rgba(0,0,0,.4);
+      0 0 .1em rgba(255,255,255,.8),
+      0 0 .3em var(--shadow-alt),
+      0 .05em .12em rgba(0,0,0,.4);
   }
+ 
   .sp-msg {
     max-width: 82vw;
     font-size: clamp(22px, 4vh, 64px);
-    color: #fff; line-height: 1.15; font-weight: 900;
+    color: rgba(255,255,255,.85); line-height: 1.2; font-weight: 500;
+    font-family: inherit;
     text-wrap: balance;
-    -webkit-text-stroke: clamp(1px,.2vh,4px) var(--outline);
-    paint-order: stroke fill;
+    -webkit-text-stroke: 0;
     text-shadow:
-      .052em  .052em 0 var(--shadow-main),
-      -.034em -.034em 0 var(--shadow-alt),
-      .074em  -.026em 0 var(--shadow-soft),
-      0 .13em .2em rgba(0,0,0,.38);
+      0 0 .12em rgba(255,255,255,.6),
+      0 .04em .1em rgba(0,0,0,.35);
   }
 
   /* ── Badge de pedra ── */
