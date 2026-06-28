@@ -450,9 +450,9 @@ function loadPats() {
 
     if (!lista.length) { showStatus('Nenhum patrocinador encontrado.'); return; }
 
-    var curNum = state.pats[state.patIdx] && state.pats[state.patIdx].num;
+    var curId = state.pats[state.patIdx] && state.pats[state.patIdx].id;
     state.pats = lista;
-    var same = lista.findIndex(function(r) { return r.num === curNum; });
+    var same = lista.findIndex(function(r) { return r.id === curId; });
     state.patIdx = same >= 0 ? same : 0;
     startLoop();
   });
