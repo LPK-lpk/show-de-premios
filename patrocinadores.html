@@ -466,7 +466,7 @@ try {
     var d = e && e.data;
     if (!d) return;
     if (d.tipo === 'sponsors' && Array.isArray(d.payload) && d.payload.length) {
-      var v = d.payload.filter(function(r) { return r && r.name; });
+      var v = d.payload.filter(function(r) { return r && (r.name || r.nome); });
       if (v.length) { state.pats = v; state.patIdx = 0; startLoop(); }
     }
     if (d.tipo === 'fundos' && Array.isArray(d.payload) && d.payload.length) {
