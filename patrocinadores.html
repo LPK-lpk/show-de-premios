@@ -371,10 +371,10 @@ function showStatus(msg) {
 function render() {
   if (!state.pats.length) { showStatus('Aguardando patrocinadores…'); return; }
   if (state.patIdx >= state.pats.length) state.patIdx = 0;
-
   var sp = state.pats[state.patIdx];
+  console.log('pat:', JSON.stringify(sp));
   applyTheme(state.patIdx);
-
+ 
   var FONTES = [
     "'Montserrat', sans-serif",
     "'Oswald', sans-serif",
