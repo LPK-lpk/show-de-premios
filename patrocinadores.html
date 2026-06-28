@@ -396,9 +396,9 @@ function render() {
   el.badge.textContent = sp.num;
   el.status.style.display = 'none';
 
-  el.name.textContent  = sp.name  || sp.nome     || '';
-  el.phone.textContent = sp.phone || sp.fone      || '';
-  el.msg.textContent   = sp.msg   || sp.mensagem  || '';
+  el.name.textContent  = sp.nome      || sp.name  || '';
+el.phone.textContent = sp.telefone  || sp.phone || sp.fone || '';
+el.msg.textContent   = sp.mensagem  || sp.msg   || '';
 
   el.name.style.display  = el.name.textContent  ? '' : 'none';
   el.phone.style.display = el.phone.textContent ? '' : 'none';
