@@ -379,7 +379,6 @@ function render() {
   var sp = state.pats[state.patIdx];
   applyTheme(state.patIdx);
 
-  /* ── Troca de fonte a cada patrocinador ── */
   var FONTES = [
     "'Montserrat', sans-serif",
     "'Oswald', sans-serif",
@@ -398,11 +397,6 @@ function render() {
   void el.card.offsetWidth;
   el.card.classList.add(FX[state.patIdx % FX.length]);
 
-  var FONTES = ["'Montserrat',sans-serif","'Oswald',sans-serif","'Anton',sans-serif","'Bebas Neue',sans-serif","'Rajdhani',sans-serif","'Barlow Condensed',sans-serif"];
-  var fonte = FONTES[state.patIdx % FONTES.length];
-  el.name.style.fontFamily = fonte;
-  el.phone.style.fontFamily = fonte;
-  el.msg.style.fontFamily = fonte;
   el.badge.textContent = sp.num;
   el.status.style.display = 'none';
 
@@ -451,12 +445,11 @@ function loadPats() {
       return;
     }
 
-    /* ── Extrai a lista — suporta todos os formatos conhecidos ── */
     var lista = [];
     if      (data.dados && Array.isArray(data.dados.patrocinadores)) lista = data.dados.patrocinadores;
     else if (data.dados && Array.isArray(data.dados.patrocinios))    lista = data.dados.patrocinios;
     else if (data.dados && Array.isArray(data.dados))                lista = data.dados;
-    else if (Array.isArray(data.patrocinios))                        lista = data.patrocinios;  /* formato atual */
+    else if (Array.isArray(data.patrocinios))                        lista = data.patrocinios;
     else if (Array.isArray(data.patrocinadores))                     lista = data.patrocinadores;
 
     if (!lista.length) { showStatus('Nenhum patrocinador encontrado.'); return; }
@@ -468,7 +461,6 @@ function loadPats() {
     startLoop();
   });
 }
-
 /* ══════════════════════════════════════════════════════════════════
    BROADCASTCHANNEL
 ══════════════════════════════════════════════════════════════════ */
