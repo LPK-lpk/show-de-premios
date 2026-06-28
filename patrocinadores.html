@@ -87,10 +87,15 @@
     text-wrap: balance; letter-spacing: .06em;
     -webkit-text-stroke: 0;
     paint-order: stroke fill;
+    animation: levitar4 6s ease-in-out infinite;
     text-shadow:
-      0 0 .06em rgba(255,255,255,.95),
-      0 0 .18em rgba(255,255,255,.4),
-      0 .06em .18em rgba(0,0,0,.6);
+      2px 4px 0 rgba(0,0,0,.5),
+      4px 8px 0 rgba(0,0,0,.4),
+      6px 12px 0 rgba(0,0,0,.3),
+      8px 16px 0 rgba(0,0,0,.2),
+      10px 22px 35px rgba(0,0,0,.7),
+      0 0 8px rgba(255,255,255,.85),
+      0 0 20px rgba(255,255,255,.3);
   }
   .sp-phone {
     font-size: clamp(24px, 4.4vh, 68px);
@@ -98,10 +103,10 @@
     font-family: inherit;
     letter-spacing: .08em;
     -webkit-text-stroke: 0;
-    paint-order: stroke fill;
+    animation: levitar4 6s ease-in-out infinite .4s;
     text-shadow:
-      0 0 .08em rgba(255,255,255,.5),
-      0 .04em .1em rgba(0,0,0,.4);
+      2px 4px 0 rgba(0,0,0,.4),
+      0 10px 25px rgba(0,0,0,.6);
   }
   .sp-msg {
     max-width: 82vw;
@@ -111,7 +116,10 @@
     text-wrap: balance;
     letter-spacing: .02em;
     -webkit-text-stroke: 0;
-    text-shadow: none;
+    animation: levitar4 6s ease-in-out infinite .8s;
+    text-shadow:
+      1px 3px 0 rgba(0,0,0,.3),
+      0 8px 18px rgba(0,0,0,.5);
   }
 
   /* ── Badge de pedra ── */
