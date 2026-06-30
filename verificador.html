@@ -384,6 +384,12 @@ function resetarPedras() {
   renderizarPedras(null);
   verificarCartelas();
   atualizarContadores();
+
+  /* Avisa o painel e o datashow para resetarem também */
+  try {
+    var canal = new BroadcastChannel('bingo-canal');
+    canal.postMessage({ tipo: 'resetar', payload: {} });
+  } catch(ignore) {}
 }
 
 function recalcularAlertas() {
