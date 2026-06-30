@@ -977,12 +977,15 @@ function fecharModalReset(){
   var modal = document.getElementById('modalResetPedras');
   if(modal) modal.style.display='none';
 }
-function executarReset(){
+  function executarReset(){
   fecharModalReset();
   called.clear(); hist=[];
   renderBig(null); paintMiniBoard(); updateStats(); updateHist();
   CANAL.postMessage({ tipo:'resetar', payload:{} });
+  /* Fallback via localStorage para abas em segundo plano */
+  localStorage.setItem('bingo_reset', Date.now().toString());
 }
+  
 /* ══════════════════════════════════════════════════════════
    BROADCAST DRAW
 ══════════════════════════════════════════════════════════ */
