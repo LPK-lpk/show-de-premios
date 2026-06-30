@@ -527,17 +527,13 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
    BUSCA YOUTUBE
 ══════════════════════════════════════════════════════════ */
 var YT_API_KEY = 'AIzaSyDq1aJrC-PGb8-M-sbGK2MY-D6-TeYQatg';
-
 function ytBuscar() {
   var termo = document.getElementById('ytBuscaInput').value.trim();
   if (!termo) { fb('fbYtBusca', 'err', 'Digite algo para buscar.'); return; }
-
   var resDiv = document.getElementById('ytResultados');
   resDiv.innerHTML = '<div style="color:#555;font-size:12px;padding:10px;text-align:center">Buscando…</div>';
-
   var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q='
     + encodeURIComponent(termo) + '&key=' + YT_API_KEY;
-
   fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -574,24 +570,32 @@ function ytBuscar() {
       resDiv.innerHTML = '';
     });
 }
-
 function ytEnviar(videoId, titulo) {
   if (typeof CANAL === 'undefined') { fb('fbYtBusca','err','Canal BroadcastChannel não disponível.'); return; }
   CANAL.postMessage({ tipo: 'play_video', payload: { videoId: videoId, titulo: titulo } });
   fb('fbYtBusca','ok','▶ "' + titulo + '" enviado para o telão!');
 }
-
 function ytAdicionar(videoId, titulo) {
-  fb('fbYtBusca', 'ok', 'Para salvar permanentemente, adicione na planilha: ' + videoId);
-  alert('Para deixar este vídeo salvo na lista, adicione manualmente na aba "Videos" da planilha:\n\nID do vídeo: ' + videoId + '\nTítulo: ' + titulo + '\nURL: https://youtu.be/' + videoId);
-}
+  if (!scriptUrl) { fb('fbYtBusca','err','Configure a URL do Apps Script nas configurações.'); return; }
 
-  function ytLimpar() {
+  fb('fbYtBusca', 'ok', 'Salvando "' + titulo + '" na lista…');
+
+  var url = scriptUrl + '?acao=adicionarVideo&titulo=' + encodeURIComponent(titulo) + '&videoId=' + encodeURIComponent(videoId);
+
+  _scJsonp(url, function(err, data) {
+    if (err || !data || !data.sucesso) {
+      fb('fbYtBusca', 'err', 'Erro ao salvar: ' + (data && data.dados && data.dados.mensagem ? data.dados.mensagem : 'desconhecido'));
+      return;
+    }
+    fb('fbYtBusca', 'ok', '✓ "' + titulo + '" salvo na lista de vídeos!');
+    vidCarregar();
+  });
+}
+function ytLimpar() {
   document.getElementById('ytBuscaInput').value = '';
   document.getElementById('ytResultados').innerHTML = '';
   document.getElementById('fbYtBusca').innerHTML = '';
 }
-
 /* ══════════════════════════════════════════════════════════
    VÍDEOS
 ══════════════════════════════════════════════════════════ */
