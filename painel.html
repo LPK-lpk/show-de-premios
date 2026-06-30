@@ -1136,6 +1136,11 @@ function confirmarResetSorteios(){
     _sc.historico  = [];
     _scRenderHistorico();
     carregarContadorCartelas();
+
+    /* Avisa o Verificador e o DataShow para resetarem as pedras também */
+    called.clear(); hist=[];
+    renderBig(null); paintMiniBoard(); updateStats(); updateHist();
+    CANAL.postMessage({ tipo:'resetar', payload:{} });
   });
 }
 
