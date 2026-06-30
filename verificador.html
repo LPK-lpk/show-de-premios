@@ -600,7 +600,9 @@ function iniciarCanal() {
         recalcularAlertas(); renderizarPedras(null);
         verificarCartelas(); atualizarContadores();
       }
-      if (d.tipo === 'resetar') resetarPedras();
+      if (d.tipo === 'resetar') {
+  resetarPedras();
+  if (cartelas.length) carregarCartelas();
     };
     document.getElementById('dot-canal').classList.add('ativo');
     document.getElementById('txt-canal').textContent = 'Canal "bingo-canal" ativo';
