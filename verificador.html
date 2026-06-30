@@ -602,9 +602,6 @@ function iniciarCanal() {
       }
       if (d.tipo === 'resetar') {
   resetarPedras();
-  if (cartelas.length) {
-    setTimeout(function() { carregarCartelas(); }, 1500);
-  }
 }
     };
     document.getElementById('dot-canal').classList.add('ativo');
