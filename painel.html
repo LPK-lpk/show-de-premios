@@ -959,6 +959,13 @@ function confirmarReset(){
   renderBig(null); paintMiniBoard(); updateStats(); updateHist();
 }
 
+  function resetarTodasTelas(){
+  if(!confirm('Resetar pedras em todas as telas conectadas?')) return;
+  called.clear(); hist=[];
+  renderBig(null); paintMiniBoard(); updateStats(); updateHist();
+  CANAL.postMessage({ tipo:'resetar', payload:{} });
+}
+
 /* ══════════════════════════════════════════════════════════
    BROADCAST DRAW
 ══════════════════════════════════════════════════════════ */
