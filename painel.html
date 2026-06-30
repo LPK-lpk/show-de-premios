@@ -551,15 +551,17 @@ function ytBuscar() {
         var id = item.id.videoId;
         var titulo = item.snippet.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         var thumb = item.snippet.thumbnails.default.url;
-        return '<div style="display:flex;align-items:center;gap:10px;padding:8px;background:#111;border-radius:6px;border:1px solid #222">' +
-          '<img src="' + thumb + '" style="width:60px;height:45px;border-radius:4px;object-fit:cover;flex-shrink:0">' +
-          '<div style="flex:1;min-width:0;font-size:12px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + item.snippet.title + '</div>' +
-          '<button class="btn btn-primary btn-sm" onclick="ytEnviar(\'' + id + '\',\'' + titulo + '\')">' +
-            '<i class="ti ti-player-play"></i>' +
-          '</button>' +
-          '<button class="btn btn-ghost btn-sm" onclick="ytAdicionar(\'' + id + '\',\'' + titulo + '\')" title="Adicionar à planilha">' +
-            '<i class="ti ti-plus"></i>' +
-          '</button>' +
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#111;border-radius:6px;border:1px solid #222;flex-wrap:wrap">' +
+          '<img src="' + thumb + '" style="width:70px;height:52px;border-radius:4px;object-fit:cover;flex-shrink:0">' +
+          '<div style="flex:1;min-width:140px;font-size:12px;color:#e5e5e5;line-height:1.4">' + item.snippet.title + '</div>' +
+          '<div style="display:flex;gap:6px;flex-shrink:0">' +
+            '<button class="btn btn-primary btn-sm" onclick="ytEnviar(\'' + id + '\',\'' + titulo + '\')" style="white-space:nowrap">' +
+              '<i class="ti ti-player-play"></i> Enviar ao telão' +
+            '</button>' +
+            '<button class="btn btn-ghost btn-sm" onclick="ytAdicionar(\'' + id + '\',\'' + titulo + '\')" style="white-space:nowrap">' +
+              '<i class="ti ti-plus"></i> Salvar na lista' +
+            '</button>' +
+          '</div>' +
         '</div>';
       }).join('');
       fb('fbYtBusca', 'ok', data.items.length + ' resultado(s) encontrado(s).');
