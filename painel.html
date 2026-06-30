@@ -948,12 +948,11 @@ function desfazer(){
 }
 
 function confirmarReset(){
-  if(!window.confirm('Resetar todos os números sorteados?')) return;
+  var ok = window.confirm('Resetar todos os números sorteados?');
+  if(!ok) return;
+  CANAL.postMessage({ tipo:'resetar', payload:{} });
   called.clear(); hist=[];
   renderBig(null); paintMiniBoard(); updateStats(); updateHist();
-  setTimeout(function(){
-    CANAL.postMessage({ tipo:'resetar', payload:{} });
-  }, 50);
 }
 
 /* ══════════════════════════════════════════════════════════
