@@ -586,6 +586,12 @@ function ytAdicionar(videoId, titulo) {
   alert('Para deixar este vídeo salvo na lista, adicione manualmente na aba "Videos" da planilha:\n\nID do vídeo: ' + videoId + '\nTítulo: ' + titulo + '\nURL: https://youtu.be/' + videoId);
 }
 
+  function ytLimpar() {
+  document.getElementById('ytBuscaInput').value = '';
+  document.getElementById('ytResultados').innerHTML = '';
+  document.getElementById('fbYtBusca').innerHTML = '';
+}
+
 /* ══════════════════════════════════════════════════════════
    VÍDEOS
 ══════════════════════════════════════════════════════════ */
