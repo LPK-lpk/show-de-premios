@@ -665,7 +665,6 @@ const CANAL        = new BroadcastChannel('bingo-canal');
 CANAL.onmessage = function(e){
   var d = e && e.data;
   if (!d) return;
-  /* Reset vindo de outra tela (ex: Verificador) — sincroniza o painel */
   if (d.tipo === 'resetar') {
     called.clear(); hist=[];
     renderBig(null); paintMiniBoard(); updateStats(); updateHist();
