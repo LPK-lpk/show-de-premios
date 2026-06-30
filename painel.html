@@ -951,23 +951,38 @@ function desfazer(){
 }
 
 function confirmarReset(){
-  if(!confirm('Resetar todos os números sorteados?')) return;
-  called.clear(); hist=[];
-  renderBig(null); paintMiniBoard(); updateStats(); updateHist();
-  try {
-    var canalTemp = new BroadcastChannel('bingo-canal');
-    canalTemp.postMessage({ tipo:'resetar', payload:{} });
-    setTimeout(function(){ canalTemp.close(); }, 500);
-  } catch(ignore){}
+  mostrarModalReset();
 }
-
-  function resetarTodasTelas(){
-  if(!confirm('Resetar pedras em todas as telas conectadas?')) return;
+function resetarTodasTelas(){
+  mostrarModalReset();
+}
+function mostrarModalReset(){
+  var modal = document.getElementById('modalResetPedras');
+  if(modal){ modal.style.display='flex'; return; }
+  var div = document.createElement('div');
+  div.id = 'modalResetPedras';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  div.innerHTML = '<div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:28px 32px;text-align:center;max-width:340px;width:90%">' +
+    '<div style="font-size:32px;margin-bottom:12px">🔄</div>' +
+    '<div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Resetar pedras sorteadas?</div>' +
+    '<div style="font-size:13px;color:#888;margin-bottom:24px">Isso limpará os números em todas as telas conectadas.</div>' +
+    '<div style="display:flex;gap:10px;justify-content:center">' +
+      '<button onclick="fecharModalReset()" style="background:#333;color:#ccc;border:none;border-radius:8px;padding:10px 24px;cursor:pointer;font-size:14px">Cancelar</button>' +
+      '<button onclick="executarReset()" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 24px;cursor:pointer;font-size:14px;font-weight:700">Resetar</button>' +
+    '</div>' +
+  '</div>';
+  document.body.appendChild(div);
+}
+function fecharModalReset(){
+  var modal = document.getElementById('modalResetPedras');
+  if(modal) modal.style.display='none';
+}
+function executarReset(){
+  fecharModalReset();
   called.clear(); hist=[];
   renderBig(null); paintMiniBoard(); updateStats(); updateHist();
   CANAL.postMessage({ tipo:'resetar', payload:{} });
 }
-
 /* ══════════════════════════════════════════════════════════
    BROADCAST DRAW
 ══════════════════════════════════════════════════════════ */
