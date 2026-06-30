@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- video.html — Show de Prêmios — Versão 1.1
+     Changelog:
+     v1.1 (2026-06-28) — Adicionado suporte a vídeo local (.mp4) via play_local,
+                          sem alterar o player do YouTube já existente
+     v1.0 — Player YouTube via BroadcastChannel (play_video / parar_video)
+-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -25,7 +31,7 @@
   }
   .espera-sub { font-size: clamp(12px, 2vh, 24px); color: #555; }
 
-  /* ── Player ── */
+  /* ── Player YouTube ── */
   #player-wrap {
     position: fixed; inset: 0; z-index: 5;
     background: #000; display: none;
@@ -34,6 +40,17 @@
   #yt-player {
     width: 100%; height: 100%;
     border: none;
+  }
+
+  /* ── Player de vídeo local ── */
+  #local-player-wrap {
+    position: fixed; inset: 0; z-index: 5;
+    background: #000; display: none;
+  }
+  #local-player-wrap.show { display: block; }
+  #local-player {
+    width: 100%; height: 100%;
+    object-fit: contain;
   }
 
   /* ── Overlay de título (aparece no início) ── */
@@ -71,6 +88,11 @@
   </iframe>
 </div>
 
+<!-- Player de vídeo local (sem anúncios) -->
+<div id="local-player-wrap">
+  <video id="local-player" autoplay controls></video>
+</div>
+
 <!-- Overlay de título -->
 <div class="titulo-overlay" id="titulo-overlay">
   <div class="titulo-box" id="titulo-texto"></div>
@@ -90,6 +112,9 @@ try {
     if (d.tipo === 'play_video') {
       tocarVideo(d.payload.videoId, d.payload.titulo || '');
     }
+    if (d.tipo === 'play_local') {
+      tocarVideoLocal(d.payload.url, d.payload.titulo || '');
+    }
     if (d.tipo === 'parar_video') {
       pararVideo();
     }
@@ -98,11 +123,12 @@ try {
   console.warn('BroadcastChannel indisponível');
 }
 
-/* ── Tocar vídeo ── */
+/* ── Tocar vídeo do YouTube (já existente) ── */
 function tocarVideo(videoId, titulo) {
   if (!videoId) return;
 
-  /* Monta URL de embed com autoplay e som */
+  pararVideoLocal();
+
   var src = 'https://www.youtube.com/embed/' + videoId
     + '?autoplay=1&controls=1&rel=0&modestbranding=1&enablejsapi=0';
 
@@ -110,20 +136,49 @@ function tocarVideo(videoId, titulo) {
   document.getElementById('player-wrap').classList.add('show');
   document.getElementById('espera').classList.add('oculta');
 
-  /* Mostra título por 5 segundos */
-  if (titulo) {
-    var ov = document.getElementById('titulo-overlay');
-    document.getElementById('titulo-texto').textContent = titulo;
-    ov.classList.add('show');
-    clearTimeout(tituloTimer);
-    tituloTimer = setTimeout(function() { ov.classList.remove('show'); }, 5000);
-  }
+  mostrarTitulo(titulo);
 }
 
-/* ── Parar vídeo ── */
+/* ── Tocar vídeo local (sem anúncios) ── */
+function tocarVideoLocal(url, titulo) {
+  if (!url) return;
+
+  /* para o YouTube se estiver tocando */
+  document.getElementById('yt-player').src = '';
+  document.getElementById('player-wrap').classList.remove('show');
+
+  var player = document.getElementById('local-player');
+  player.src = url;
+  player.play().catch(function(){});
+
+  document.getElementById('local-player-wrap').classList.add('show');
+  document.getElementById('espera').classList.add('oculta');
+
+  mostrarTitulo(titulo);
+}
+
+function pararVideoLocal() {
+  var player = document.getElementById('local-player');
+  player.pause();
+  player.src = '';
+  document.getElementById('local-player-wrap').classList.remove('show');
+}
+
+/* ── Mostra título por 5 segundos ── */
+function mostrarTitulo(titulo) {
+  if (!titulo) return;
+  var ov = document.getElementById('titulo-overlay');
+  document.getElementById('titulo-texto').textContent = titulo;
+  ov.classList.add('show');
+  clearTimeout(tituloTimer);
+  tituloTimer = setTimeout(function() { ov.classList.remove('show'); }, 5000);
+}
+
+/* ── Parar qualquer vídeo ── */
 function pararVideo() {
   document.getElementById('yt-player').src = '';
   document.getElementById('player-wrap').classList.remove('show');
+  pararVideoLocal();
   document.getElementById('espera').classList.remove('oculta');
   document.getElementById('titulo-overlay').classList.remove('show');
 }
