@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!-- entrevista.html — Show de Prêmios
+     Tela dedicada para exibir uma entrevista/videochamada ao vivo (Jitsi Meet),
+     separada do datashow.html (que continua só com o sorteio de números).
+     Controlada pelo painel via BroadcastChannel, mesmo padrão de video.html. -->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrevista ao Vivo — Show de Prêmios</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+
+  /* ── Tela de espera ── */
+  .espera {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3vh;
+    background: #000;
+    transition: opacity .6s ease;
+  }
+  .espera.oculta { opacity: 0; pointer-events: none; }
+  .espera-logo { font-size: 8vh; }
+  .espera-titulo {
+    font-size: clamp(18px, 3.5vh, 48px);
+    font-weight: 700; color: #fff; text-align: center;
+    text-shadow: 0 2px 12px rgba(0,0,0,.6);
+  }
+  .espera-sub { font-size: clamp(12px, 2vh, 24px); color: #555; }
+
+  /* ── Chamada ao vivo ── */
+  #call-wrap {
+    position: fixed; inset: 0; z-index: 5;
+    background: #000; display: none;
+  }
+  #call-wrap.show { display: block; }
+  #call-frame { width: 100%; height: 100%; border: none; }
+</style>
+</head>
+<body>
+
+<!-- Tela de espera -->
+<div class="espera" id="espera">
+  <div class="espera-logo">🎤</div>
+  <div class="espera-titulo">Aguardando entrevista…</div>
+  <div class="espera-sub">O operador iniciará a chamada pelo painel</div>
+</div>
+
+<!-- Videochamada (Jitsi Meet) -->
+<div id="call-wrap">
+  <iframe id="call-frame"
+    allow="camera; microphone; fullscreen; display-capture; autoplay; speaker-selection"
+    allowfullscreen></iframe>
+</div>
+
+<script>
+var CANAL_NOME = 'bingo-canal';
+
+/* ── BroadcastChannel ── */
+try {
+  var canal = new BroadcastChannel(CANAL_NOME);
+  canal.onmessage = function(e) {
+    var d = e && e.data;
+    if (!d) return;
+
+    if (d.tipo === 'mostrar_entrevista') {
+      mostrarEntrevista(d.payload && d.payload.sala);
+    }
+    if (d.tipo === 'ocultar_entrevista') {
+      ocultarEntrevista();
+    }
+  };
+} catch(err) {
+  console.warn('BroadcastChannel indisponível');
+}
+
+/* ── Entrar na sala Jitsi ──
+   "sala" é só o nome da sala (sem espaços/acentos) — o mesmo nome que
+   a pessoa remota usa para entrar em meet.jit.si/<sala>. Esta tela
+   entra sem câmera/microfone próprios (só recebe e mostra o vídeo da
+   pessoa remota), evitando eco/microfonia com as caixas de som do salão. */
+function mostrarEntrevista(sala) {
+  if (!sala) return;
+  var src = 'https://meet.jit.si/' + encodeURIComponent(sala) +
+    '#config.prejoinPageEnabled=false' +
+    '&config.startWithAudioMuted=true' +
+    '&config.startWithVideoMuted=true' +
+    '&config.disableDeepLinking=true' +
+    '&userInfo.displayName=%22Tel%C3%A3o%20-%20Entrevista%22';
+
+  document.getElementById('call-frame').src = src;
+  document.getElementById('call-wrap').classList.add('show');
+  document.getElementById('espera').classList.add('oculta');
+}
+
+/* ── Encerrar a chamada e voltar pra tela de espera ── */
+function ocultarEntrevista() {
+  document.getElementById('call-frame').src = 'about:blank'; // libera câmera/mic do dispositivo
+  document.getElementById('call-wrap').classList.remove('show');
+  document.getElementById('espera').classList.remove('oculta');
+}
+
+/* ── Tecla F — fullscreen · Esc — encerrar ── */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'f' || e.key === 'F') {
+    if (!document.fullscreenElement)
+      document.documentElement.requestFullscreen().catch(function(){});
+  }
+  if (e.key === 'Escape') ocultarEntrevista();
+});
+</script>
+</body>
+</html>
