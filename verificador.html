@@ -615,15 +615,24 @@ document.getElementById('pedra-manual').addEventListener('keydown', function(e) 
   if (e.key === 'Enter') adicionarPedraManual();
 });
 
-/* ── Polling localStorage — fallback para abas em segundo plano ── */
+/* ── Fallback localStorage — verifica ao retornar para a aba ── */
 var _ultimoReset = localStorage.getItem('bingo_reset') || '0';
-setInterval(function(){
+
+function verificarResetPendente() {
   var r = localStorage.getItem('bingo_reset') || '0';
-  if(r !== _ultimoReset){
+  if (r !== _ultimoReset) {
     _ultimoReset = r;
     resetarPedras();
   }
-}, 800);
+}
+
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    verificarResetPendente();
+  }
+});
+
+setInterval(verificarResetPendente, 2000);
 
 iniciarCanal();
 atualizarContadores();
