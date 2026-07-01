@@ -632,7 +632,10 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-setInterval(verificarResetPendente, 2000);
+/* Inicia o intervalo só após 3 segundos para evitar falso positivo no carregamento */
+setTimeout(function() {
+  setInterval(verificarResetPendente, 2000);
+}, 3000);
 
 iniciarCanal();
 atualizarContadores();
