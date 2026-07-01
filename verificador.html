@@ -377,13 +377,22 @@ function removerUltimaPedra() {
   atualizarContadores();
 }
 
-function resetarPedras() {
-  if (pedrasSorteadas.size > 0 && !confirm('Resetar todas as pedras desta rodada?')) return;
+/* Limpa o estado local sem diálogo e sem reemitir no canal.
+   Usada quando o reset chega de outra aba (painel/datashow) — nunca
+   deve travar esperando confirmação do usuário nesta tela. */
+function resetarPedrasLocal() {
   pedrasSorteadas.clear();
   recalcularAlertas();
   renderizarPedras(null);
   verificarCartelas();
   atualizarContadores();
+}
+
+/* Clique no botão "Resetar rodada" desta aba: pede confirmação e
+   avisa as outras telas. */
+function resetarPedras() {
+  if (pedrasSorteadas.size > 0 && !confirm('Resetar todas as pedras desta rodada?')) return;
+  resetarPedrasLocal();
 
   /* Avisa o painel e o datashow para resetarem também */
   try {
@@ -601,7 +610,7 @@ function iniciarCanal() {
         verificarCartelas(); atualizarContadores();
       }
       if (d.tipo === 'resetar') {
-        resetarPedras();
+        resetarPedrasLocal();
       }
     };
     document.getElementById('dot-canal').classList.add('ativo');
@@ -622,7 +631,7 @@ function verificarResetPendente() {
   var r = localStorage.getItem('bingo_reset') || '0';
   if (r !== _ultimoReset) {
     _ultimoReset = r;
-    resetarPedras();
+    resetarPedrasLocal();
   }
 }
 
