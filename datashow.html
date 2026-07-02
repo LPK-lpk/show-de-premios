@@ -318,13 +318,11 @@
   try {
     firebase.initializeApp(firebaseConfig);
     var _fbUltimoTs = null; // evita reprocessar a mesma mensagem duas vezes
-    var _fbPrimeiraLeitura = true; // ignora o valor "antigo" já salvo ao abrir a tela
     firebase.database().ref('bingo/ultimaMensagem').on('value', function(snap) {
       var d = snap.val();
-      if (_fbPrimeiraLeitura) { _fbPrimeiraLeitura = false; _fbUltimoTs = d && d.ts; return; }
-      if (!d || d.ts === _fbUltimoTs) return;
+      if (!d || d.ts === _fbUltimoTs) return; // já processado
       _fbUltimoTs = d.ts;
-      processarMensagem(d);
+      processarMensagem(d); // roda também na primeira leitura, pra já abrir "atualizada" com o jogo em andamento
     });
   } catch(e) {
     console.warn('Firebase indisponível — esta tela só sincroniza com abas do mesmo computador.', e);
