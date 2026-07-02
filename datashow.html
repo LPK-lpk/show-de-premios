@@ -258,8 +258,14 @@
 
   /* ── Processa mensagem, venha ela do BroadcastChannel (mesmo
      computador) ou do Firebase (qualquer aparelho na rede/internet) ── */
-  function processarMensagem(d) {
+    function processarMensagem(d) {
     if (!d) return;
+    if (d.tipo === 'trocar_tela') {
+      var alvo = d.payload && d.payload.arquivo;
+      var atual = location.pathname.split('/').pop() || 'index.html';
+      if (alvo && alvo !== atual) location.href = alvo;
+      return;
+    }
 
     if (d.tipo === 'draw') {
       ocultarCartela();
