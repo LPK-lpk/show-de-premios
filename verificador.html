@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verificador de Cartelas — Bingo Paróquia</title>
+<!-- Firebase (permite abrir esta tela em outro aparelho/rede e continuar
+     sincronizada com o painel em tempo real) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root {
     --verde-escuro: #0A3D1A;
@@ -357,10 +361,7 @@ function registrarPedra(num, animada) {
   /* Avisa o painel (e demais telas) que este número foi adicionado por
      aqui, pra ele entrar também no sorteio oficial — sem isso, um número
      digitado só nesta aba nunca aparecia no painel/telão. */
-  try {
-    var canalPedra = new BroadcastChannel('bingo-canal');
-    canalPedra.postMessage({ tipo: 'pedra_manual', payload: { num: num } });
-  } catch(ignore) {}
+  enviarMensagemVerificador('pedra_manual', { num: num });
 }
 
 function adicionarPedraManual() {
@@ -403,10 +404,7 @@ function resetarPedras() {
   resetarPedrasLocal();
 
   /* Avisa o painel e o datashow para resetarem também */
-  try {
-    var canal = new BroadcastChannel('bingo-canal');
-    canal.postMessage({ tipo: 'resetar', payload: {} });
-  } catch(ignore) {}
+  enviarMensagemVerificador('resetar', {});
 }
 
 function recalcularAlertas() {
@@ -602,29 +600,77 @@ function limparTudo() {
 /* ══════════════════════════════════════════════════════
    BROADCASTCHANNEL
 ══════════════════════════════════════════════════════ */
+/* Trata mensagem vinda do BroadcastChannel (mesmo computador) ou do
+   Firebase (qualquer aparelho na internet/wifi). */
+function processarMensagemVerificador(d) {
+  if (!d) return;
+  if (d.tipo === 'draw') {
+    ((d.payload && d.payload.called) || []).forEach(function(n) { pedrasSorteadas.add(n); });
+    renderizarPedras(d.payload && d.payload.num || null);
+    verificarCartelas(); atualizarContadores();
+  }
+  if (d.tipo === 'undo') {
+    pedrasSorteadas = new Set((d.payload && d.payload.called) || []);
+    recalcularAlertas(); renderizarPedras(null);
+    verificarCartelas(); atualizarContadores();
+  }
+  if (d.tipo === 'resetar') {
+    resetarPedrasLocal();
+  }
+}
+
+var _fbRefVerificador = null;
+
+/* Envia por AMBOS os canais — usado pelo botão "Resetar rodada" e pelo
+   campo de pedra manual, pra funcionar mesmo se este Verificador estiver
+   rodando num aparelho diferente do painel. */
+function enviarMensagemVerificador(tipo, payload) {
+  try {
+    var canalMsg = new BroadcastChannel('bingo-canal');
+    canalMsg.postMessage({ tipo: tipo, payload: payload });
+  } catch(ignore) {}
+  if (_fbRefVerificador) {
+    try { _fbRefVerificador.set({ tipo: tipo, payload: payload, ts: Date.now() }); }
+    catch(ignore) {}
+  }
+}
+
 function iniciarCanal() {
   try {
     var canal = new BroadcastChannel('bingo-canal');
     canal.onmessage = function(e) {
-      var d = e && e.data; if (!d) return;
-      if (d.tipo === 'draw') {
-        ((d.payload && d.payload.called) || []).forEach(function(n) { pedrasSorteadas.add(n); });
-        renderizarPedras(d.payload && d.payload.num || null);
-        verificarCartelas(); atualizarContadores();
-      }
-      if (d.tipo === 'undo') {
-        pedrasSorteadas = new Set((d.payload && d.payload.called) || []);
-        recalcularAlertas(); renderizarPedras(null);
-        verificarCartelas(); atualizarContadores();
-      }
-      if (d.tipo === 'resetar') {
-        resetarPedrasLocal();
-      }
+      processarMensagemVerificador(e && e.data);
     };
     document.getElementById('dot-canal').classList.add('ativo');
     document.getElementById('txt-canal').textContent = 'Canal "bingo-canal" ativo';
   } catch(e) {
     document.getElementById('txt-canal').textContent = 'BroadcastChannel indisponível';
+  }
+
+  /* Firebase — sincronização entre aparelhos diferentes. É um "extra"
+     ao lado do BroadcastChannel; se falhar, a sincronização no mesmo
+     computador continua funcionando normalmente. */
+  try {
+    var firebaseConfig = {
+      apiKey: "AIzaSyBPkvhBHOfZOzEqlukWgHRJnoDeYFrtj0I",
+      authDomain: "show-de-premios-scj.firebaseapp.com",
+      databaseURL: "https://show-de-premios-scj-default-rtdb.firebaseio.com",
+      projectId: "show-de-premios-scj",
+      storageBucket: "show-de-premios-scj.firebasestorage.app",
+      messagingSenderId: "869902837867",
+      appId: "1:869902837867:web:d690f79e6f916da672a92e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    _fbRefVerificador = firebase.database().ref('bingo/ultimaMensagem');
+    var _fbUltimoTsVerif = null;
+    _fbRefVerificador.on('value', function(snap) {
+      var d = snap.val();
+      if (!d || d.ts === _fbUltimoTsVerif) return;
+      _fbUltimoTsVerif = d.ts;
+      processarMensagemVerificador(d);
+    });
+  } catch(e) {
+    console.warn('Firebase indisponível — esta tela só sincroniza com abas do mesmo computador.', e);
   }
 }
 
