@@ -10,6 +10,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vídeos — Show de Prêmios</title>
+<!-- Firebase (permite abrir esta tela em outro aparelho/rede e continuar
+     sincronizada com o painel em tempo real) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
@@ -103,24 +107,53 @@ var CANAL_NOME = 'bingo-canal';
 var tituloTimer = null;
 
 /* ── BroadcastChannel ── */
+function processarMensagemVideo(d) {
+  if (!d) return;
+
+  if (d.tipo === 'play_video') {
+    tocarVideo(d.payload.videoId, d.payload.titulo || '');
+  }
+  if (d.tipo === 'play_local') {
+    tocarVideoLocal(d.payload.url, d.payload.titulo || '');
+  }
+  if (d.tipo === 'parar_video') {
+    pararVideo();
+  }
+}
+
 try {
   var canal = new BroadcastChannel(CANAL_NOME);
   canal.onmessage = function(e) {
-    var d = e && e.data;
-    if (!d) return;
-
-    if (d.tipo === 'play_video') {
-      tocarVideo(d.payload.videoId, d.payload.titulo || '');
-    }
-    if (d.tipo === 'play_local') {
-      tocarVideoLocal(d.payload.url, d.payload.titulo || '');
-    }
-    if (d.tipo === 'parar_video') {
-      pararVideo();
-    }
+    processarMensagemVideo(e && e.data);
   };
 } catch(err) {
   console.warn('BroadcastChannel indisponível');
+}
+
+/* Firebase — sincronização entre aparelhos diferentes (ex.: esta tela
+   aberta num monitor de outra sala). É um "extra" ao lado do
+   BroadcastChannel; se falhar, a sincronização no mesmo computador
+   continua funcionando normalmente. */
+try {
+  var firebaseConfig = {
+    apiKey: "AIzaSyBPkvhBHOfZOzEqlukWgHRJnoDeYFrtj0I",
+    authDomain: "show-de-premios-scj.firebaseapp.com",
+    databaseURL: "https://show-de-premios-scj-default-rtdb.firebaseio.com",
+    projectId: "show-de-premios-scj",
+    storageBucket: "show-de-premios-scj.firebasestorage.app",
+    messagingSenderId: "869902837867",
+    appId: "1:869902837867:web:d690f79e6f916da672a92e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var _fbUltimoTsVideo = null;
+  firebase.database().ref('bingo/ultimaMensagem').on('value', function(snap) {
+    var d = snap.val();
+    if (!d || d.ts === _fbUltimoTsVideo) return;
+    _fbUltimoTsVideo = d.ts;
+    processarMensagemVideo(d);
+  });
+} catch(e) {
+  console.warn('Firebase indisponível — esta tela só sincroniza com abas do mesmo computador.', e);
 }
 
 /* ── Tocar vídeo do YouTube (já existente) ── */
