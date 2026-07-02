@@ -734,8 +734,7 @@ function entrevistaOcultar() {
 ══════════════════════════════════════════════════════════ */
 const CANAL        = new BroadcastChannel('bingo-canal');
 
-CANAL.onmessage = function(e){
-  var d = e && e.data;
+function processarMensagemPainel(d){
   if (!d) return;
   if (d.tipo === 'resetar') {
     called.clear(); hist=[];
@@ -745,6 +744,10 @@ CANAL.onmessage = function(e){
     var n = d.payload && d.payload.num;
     if (n && !called.has(n)) registrarNumero(n);
   }
+}
+
+CANAL.onmessage = function(e){
+  processarMensagemPainel(e && e.data);
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -766,6 +769,16 @@ let firebaseRef = null;
 try {
   firebase.initializeApp(firebaseConfig);
   firebaseRef = firebase.database().ref('bingo/ultimaMensagem');
+  /* Escuta também — necessário pra receber mensagens vindas de telas em
+     OUTROS aparelhos, como o Verificador rodando num tablet separado
+     (reset ou pedra manual de lá precisam chegar até aqui). */
+  let _fbUltimoTsPainel = null;
+  firebaseRef.on('value', function(snap){
+    var d = snap.val();
+    if (!d || d.ts === _fbUltimoTsPainel) return;
+    _fbUltimoTsPainel = d.ts;
+    processarMensagemPainel(d);
+  });
 } catch(e) {
   console.warn('Firebase indisponível — sincronização entre aparelhos desativada.', e);
 }
