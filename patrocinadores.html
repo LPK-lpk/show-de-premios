@@ -470,8 +470,14 @@ function loadPats() {
 /* ══════════════════════════════════════════════════════════════════
    BROADCASTCHANNEL
 ══════════════════════════════════════════════════════════════════ */
-function processarMensagemPatrocinadores(d) {
-  if (!d) return;
+  function processarMensagemPatrocinadores(d) {
+    if (!d) return;
+    if (d.tipo === 'trocar_tela') {
+      var alvo = d.payload && d.payload.arquivo;
+      var atual = location.pathname.split('/').pop() || 'index.html';
+      if (alvo && alvo !== atual) location.href = alvo;
+      return;
+    }
   if (d.tipo === 'sponsors' && Array.isArray(d.payload) && d.payload.length) {
     var v = d.payload.filter(function(r) { return r && (r.name || r.nome); });
     if (v.length) { state.pats = v; state.patIdx = 0; startLoop(); }
