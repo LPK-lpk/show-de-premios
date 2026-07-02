@@ -8,6 +8,7 @@
 <!-- Firebase (sincronização entre aparelhos diferentes, ex: 2º telão em outra sala) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
 /* ══ RESET ══ */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -794,16 +795,25 @@ const firebaseConfig = {
 let firebaseRef = null;
 try {
   firebase.initializeApp(firebaseConfig);
-  firebaseRef = firebase.database().ref('bingo/ultimaMensagem');
-  /* Escuta também — necessário pra receber mensagens vindas de telas em
-     OUTROS aparelhos, como o Verificador rodando num tablet separado
-     (reset ou pedra manual de lá precisam chegar até aqui). */
-  let _fbUltimoTsPainel = null;
-  firebaseRef.on('value', function(snap){
-    var d = snap.val();
-    if (!d || d.ts === _fbUltimoTsPainel) return;
-    _fbUltimoTsPainel = d.ts;
-    processarMensagemPainel(d);
+  /* Login anônimo — silencioso, sem tela nenhuma pro operador. Só existe
+     pra satisfazer a regra do banco (auth != null) e impedir acesso de
+     quem só souber a URL/chaves sem nunca ter aberto o sistema. */
+  firebase.auth().signInAnonymously().catch(function(e){
+    console.warn('Falha no login anônimo do Firebase:', e);
+  });
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user || firebaseRef) return; // já configurado
+    firebaseRef = firebase.database().ref('bingo/ultimaMensagem');
+    /* Escuta também — necessário pra receber mensagens vindas de telas em
+       OUTROS aparelhos, como o Verificador rodando num tablet separado
+       (reset ou pedra manual de lá precisam chegar até aqui). */
+    let _fbUltimoTsPainel = null;
+    firebaseRef.on('value', function(snap){
+      var d = snap.val();
+      if (!d || d.ts === _fbUltimoTsPainel) return;
+      _fbUltimoTsPainel = d.ts;
+      processarMensagemPainel(d);
+    });
   });
 } catch(e) {
   console.warn('Firebase indisponível — sincronização entre aparelhos desativada.', e);
