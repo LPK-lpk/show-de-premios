@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>Paróquia SCJM — Show de Prêmios DataShow</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<!-- Firebase (permite abrir esta tela em outro computador/TV, em outra sala,
+     e ela ficar sincronizada com o painel em tempo real pela internet/wifi) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root { --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -252,10 +256,9 @@
     document.getElementById('cartelaOverlay').classList.remove('show');
   }
 
-  /* ── BroadcastChannel ── */
-  var canal = new BroadcastChannel('bingo-canal');
-  canal.onmessage = function(e) {
-    var d = e.data;
+  /* ── Processa mensagem, venha ela do BroadcastChannel (mesmo
+     computador) ou do Firebase (qualquer aparelho na rede/internet) ── */
+  function processarMensagem(d) {
     if (!d) return;
 
     if (d.tipo === 'draw') {
@@ -289,7 +292,43 @@
     if (d.tipo === 'ocultar_cartela') {
       ocultarCartela();
     }
+  }
+
+  /* ── BroadcastChannel (sincronização instantânea entre abas do
+     mesmo navegador/computador) ── */
+  var canal = new BroadcastChannel('bingo-canal');
+  canal.onmessage = function(e) {
+    processarMensagem(e.data);
   };
+
+  /* ── Firebase (sincronização entre aparelhos diferentes — ex.: esta
+     tela aberta num computador/TV de outra sala, em outra rede, desde
+     que tenha internet). É um "extra" ao lado do BroadcastChannel: se
+     o Firebase falhar, a sincronização no mesmo computador continua
+     funcionando normalmente. ── */
+  var firebaseConfig = {
+    apiKey: "AIzaSyBPkvhBHOfZOzEqlukWgHRJnoDeYFrtj0I",
+    authDomain: "show-de-premios-scj.firebaseapp.com",
+    databaseURL: "https://show-de-premios-scj-default-rtdb.firebaseio.com",
+    projectId: "show-de-premios-scj",
+    storageBucket: "show-de-premios-scj.firebasestorage.app",
+    messagingSenderId: "869902837867",
+    appId: "1:869902837867:web:d690f79e6f916da672a92e"
+  };
+  try {
+    firebase.initializeApp(firebaseConfig);
+    var _fbUltimoTs = null; // evita reprocessar a mesma mensagem duas vezes
+    var _fbPrimeiraLeitura = true; // ignora o valor "antigo" já salvo ao abrir a tela
+    firebase.database().ref('bingo/ultimaMensagem').on('value', function(snap) {
+      var d = snap.val();
+      if (_fbPrimeiraLeitura) { _fbPrimeiraLeitura = false; _fbUltimoTs = d && d.ts; return; }
+      if (!d || d.ts === _fbUltimoTs) return;
+      _fbUltimoTs = d.ts;
+      processarMensagem(d);
+    });
+  } catch(e) {
+    console.warn('Firebase indisponível — esta tela só sincroniza com abas do mesmo computador.', e);
+  }
 
   /* ── Carrega patrocinadores e exibe o Coringa (num=0) em espera ── */
   var SCRIPT_PATROC = 'https://script.google.com/macros/s/AKfycbyxYWSmr0zHOczqaUg7yoemsXrCDN9mW6WNQJi61IqOSBpBjm9QnB4k6mjwetCj5FYK/exec';
