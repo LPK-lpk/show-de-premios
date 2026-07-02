@@ -353,6 +353,14 @@ function registrarPedra(num, animada) {
   renderizarPedras(animada ? num : null);
   verificarCartelas();
   atualizarContadores();
+
+  /* Avisa o painel (e demais telas) que este número foi adicionado por
+     aqui, pra ele entrar também no sorteio oficial — sem isso, um número
+     digitado só nesta aba nunca aparecia no painel/telão. */
+  try {
+    var canalPedra = new BroadcastChannel('bingo-canal');
+    canalPedra.postMessage({ tipo: 'pedra_manual', payload: { num: num } });
+  } catch(ignore) {}
 }
 
 function adicionarPedraManual() {
