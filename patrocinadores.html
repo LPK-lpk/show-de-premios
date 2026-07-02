@@ -7,6 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Oswald:wght@600;700&family=Anton&family=Bebas+Neue&family=Rajdhani:wght@600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<!-- Firebase (permite abrir esta tela em outro aparelho/rede e continuar
+     sincronizada com o painel em tempo real) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -466,22 +470,51 @@ function loadPats() {
 /* ══════════════════════════════════════════════════════════════════
    BROADCASTCHANNEL
 ══════════════════════════════════════════════════════════════════ */
+function processarMensagemPatrocinadores(d) {
+  if (!d) return;
+  if (d.tipo === 'sponsors' && Array.isArray(d.payload) && d.payload.length) {
+    var v = d.payload.filter(function(r) { return r && (r.name || r.nome); });
+    if (v.length) { state.pats = v; state.patIdx = 0; startLoop(); }
+  }
+  if (d.tipo === 'fundos' && Array.isArray(d.payload) && d.payload.length) {
+    state.fundos = d.payload; state.bgIdx = 0;
+    applyBg(state.fundos[0].caminho || state.fundos[0].url, state.fundos[0].nome);
+    startBgCycle();
+  }
+}
+
 try {
   var ch = new BroadcastChannel('bingo-canal');
   ch.onmessage = function(e) {
-    var d = e && e.data;
-    if (!d) return;
-    if (d.tipo === 'sponsors' && Array.isArray(d.payload) && d.payload.length) {
-      var v = d.payload.filter(function(r) { return r && (r.name || r.nome); });
-      if (v.length) { state.pats = v; state.patIdx = 0; startLoop(); }
-    }
-    if (d.tipo === 'fundos' && Array.isArray(d.payload) && d.payload.length) {
-      state.fundos = d.payload; state.bgIdx = 0;
-      applyBg(state.fundos[0].caminho || state.fundos[0].url, state.fundos[0].nome);
-      startBgCycle();
-    }
+    processarMensagemPatrocinadores(e && e.data);
   };
 } catch(ignore) {}
+
+/* Firebase — sincronização entre aparelhos diferentes (ex.: esta tela
+   aberta num monitor de outra sala). É um "extra" ao lado do
+   BroadcastChannel; se falhar, a sincronização no mesmo computador
+   continua funcionando normalmente. */
+try {
+  var firebaseConfig = {
+    apiKey: "AIzaSyBPkvhBHOfZOzEqlukWgHRJnoDeYFrtj0I",
+    authDomain: "show-de-premios-scj.firebaseapp.com",
+    databaseURL: "https://show-de-premios-scj-default-rtdb.firebaseio.com",
+    projectId: "show-de-premios-scj",
+    storageBucket: "show-de-premios-scj.firebasestorage.app",
+    messagingSenderId: "869902837867",
+    appId: "1:869902837867:web:d690f79e6f916da672a92e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var _fbUltimoTsPatroc = null;
+  firebase.database().ref('bingo/ultimaMensagem').on('value', function(snap) {
+    var d = snap.val();
+    if (!d || d.ts === _fbUltimoTsPatroc) return;
+    _fbUltimoTsPatroc = d.ts;
+    processarMensagemPatrocinadores(d);
+  });
+} catch(e) {
+  console.warn('Firebase indisponível — esta tela só sincroniza com abas do mesmo computador.', e);
+}
 
 /* ══════════════════════════════════════════════════════════════════
    TECLADO
