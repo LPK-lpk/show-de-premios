@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel Operador — Show de Prêmios Paróquia SCJM</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<!-- Firebase (sincronização entre aparelhos diferentes, ex: 2º telão em outra sala) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 /* ══ RESET ══ */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -613,7 +616,7 @@ function ytBuscar() {
 }
 function ytEnviar(videoId, titulo) {
   if (typeof CANAL === 'undefined') { fb('fbYtBusca','err','Canal BroadcastChannel não disponível.'); return; }
-  CANAL.postMessage({ tipo: 'play_video', payload: { videoId: videoId, titulo: titulo } });
+  enviarCanal('play_video', { videoId: videoId, titulo: titulo });
   fb('fbYtBusca','ok','▶ "' + titulo + '" enviado para o telão!');
 }
 function ytAdicionar(videoId, titulo) {
@@ -684,13 +687,13 @@ function vidRenderLista() {
 
 function vidEnviar(videoId, titulo) {
   if (typeof CANAL === 'undefined') { fb('fbVideos','err','Canal BroadcastChannel não disponível.'); return; }
-  CANAL.postMessage({ tipo: 'play_video', payload: { videoId: videoId, titulo: titulo } });
+  enviarCanal('play_video', { videoId: videoId, titulo: titulo });
   fb('fbVideos','ok','▶ "' + titulo + '" enviado para o telão!');
 }
 
 function vidParar() {
   if (typeof CANAL === 'undefined') return;
-  CANAL.postMessage({ tipo: 'parar_video', payload: {} });
+  enviarCanal('parar_video', {});
   fb('fbVideos','ok','⏹ Vídeo parado no telão.');
 }
 
@@ -717,12 +720,12 @@ function entrevistaCopiarLink() {
 function entrevistaMostrar() {
   const sala = entrevistaSalaAtual();
   if (!sala) { fb('fbEntrevista','err','Digite um nome de sala primeiro.'); return; }
-  CANAL.postMessage({ tipo: 'mostrar_entrevista', payload: { sala: sala } });
+  enviarCanal('mostrar_entrevista', { sala: sala });
   fb('fbEntrevista','ok','Comando enviado! Abra/confira a tela "entrevista.html" (sala: ' + sala + ').');
 }
 
 function entrevistaOcultar() {
-  CANAL.postMessage({ tipo: 'ocultar_entrevista', payload: {} });
+  enviarCanal('ocultar_entrevista', {});
   fb('fbEntrevista','ok','Chamada encerrada na tela de entrevista.');
 }
 
@@ -739,6 +742,40 @@ CANAL.onmessage = function(e){
     renderBig(null); paintMiniBoard(); updateStats(); updateHist();
   }
 };
+
+/* ══════════════════════════════════════════════════════════
+   FIREBASE — sincronização entre aparelhos diferentes
+   (ex.: 2º telão em outra sala, ligado em outra rede/computador).
+   Isto é um "extra" ao lado do BroadcastChannel — não substitui nem
+   altera o que já funciona entre abas do mesmo navegador/computador.
+══════════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBPkvhBHOfZOzEqlukWgHRJnoDeYFrtj0I",
+  authDomain: "show-de-premios-scj.firebaseapp.com",
+  databaseURL: "https://show-de-premios-scj-default-rtdb.firebaseio.com",
+  projectId: "show-de-premios-scj",
+  storageBucket: "show-de-premios-scj.firebasestorage.app",
+  messagingSenderId: "869902837867",
+  appId: "1:869902837867:web:d690f79e6f916da672a92e"
+};
+let firebaseRef = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  firebaseRef = firebase.database().ref('bingo/ultimaMensagem');
+} catch(e) {
+  console.warn('Firebase indisponível — sincronização entre aparelhos desativada.', e);
+}
+
+/* Envia por AMBOS os canais: BroadcastChannel (mesmo navegador/computador,
+   instantâneo) e Firebase (qualquer aparelho na internet/wifi). Use esta
+   função em vez de chamar CANAL.postMessage diretamente. */
+function enviarCanal(tipo, payload){
+  CANAL.postMessage({ tipo: tipo, payload: payload });
+  if (firebaseRef) {
+    try { firebaseRef.set({ tipo: tipo, payload: payload, ts: Date.now() }); }
+    catch(e) { console.warn('Falha ao sincronizar via Firebase:', e); }
+  }
+}
 
 const LS_SESSION   = 'bingo_session_v1';
 const LS_AUTH_URL  = 'bingo_auth_url';
@@ -1016,7 +1053,7 @@ function desfazer(){
   if(hist.length) renderBig(hist[0]); else renderBig(null);
   paintMiniBoard(); updateStats(); updateHist();
   const sponsor=hist.length?(sponsors.find(s=>String(s.num)===String(hist[0]))||null):null;
-  CANAL.postMessage({ tipo:'undo', payload:{ called:[...called], hist:[...hist], sponsor } });
+  enviarCanal('undo', { called:[...called], hist:[...hist], sponsor });
 }
 
 function confirmarReset(){
@@ -1048,7 +1085,7 @@ function fecharModalReset(){
   fecharModalReset();
   called.clear(); hist=[];
   renderBig(null); paintMiniBoard(); updateStats(); updateHist();
-  CANAL.postMessage({ tipo:'resetar', payload:{} });
+  enviarCanal('resetar', {});
   /* Fallback via localStorage para abas em segundo plano */
   localStorage.setItem('bingo_reset', Date.now().toString());
 }
@@ -1057,7 +1094,7 @@ function fecharModalReset(){
    BROADCAST DRAW
 ══════════════════════════════════════════════════════════ */
 function broadcastDraw(n, sponsor){
-  CANAL.postMessage({ tipo:'draw', payload:{ num:n, called:[...called], hist:[...hist], sponsor } });
+  enviarCanal('draw', { num:n, called:[...called], hist:[...hist], sponsor });
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1210,12 +1247,12 @@ function sortearCartela(){
 function enviarCartelaTelao(){
   if(!lastCartela){ fb('fbCartela','warn','Sorteie uma cartela primeiro.'); return; }
   const cartelaPayload = { id: lastCartela.id, nome: lastCartela.comprador, telefone: lastCartela.telefone };
-  CANAL.postMessage({ tipo:'sorteio_cartela', payload:{ cartela: cartelaPayload, duracao:20000 } });
+  enviarCanal('sorteio_cartela', { cartela: cartelaPayload, duracao:20000 });
   fb('fbCartela','ok','Enviado para o telão por 20 segundos.');
 }
 
 function ocultarCartelaTelao(){
-  CANAL.postMessage({ tipo:'ocultar_cartela', payload:{} });
+  enviarCanal('ocultar_cartela', {});
   fb('fbCartela','ok','Overlay ocultado do telão.');
 }
 
@@ -1320,7 +1357,7 @@ function renderSponsorList(){
 }
 function enviarPatrocinadores(){
   if(!sponsors.length){ fb('fbPatroc','warn','Carregue os patrocinadores primeiro.'); return; }
-  CANAL.postMessage({ tipo:'sponsors', payload:sponsors });
+  enviarCanal('sponsors', sponsors);
   fb('fbPatroc','ok','Lista enviada para a tela de patrocinadores!');
 }
 
