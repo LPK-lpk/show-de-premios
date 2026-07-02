@@ -741,6 +741,10 @@ CANAL.onmessage = function(e){
     called.clear(); hist=[];
     renderBig(null); paintMiniBoard(); updateStats(); updateHist();
   }
+  if (d.tipo === 'pedra_manual') {
+    var n = d.payload && d.payload.num;
+    if (n && !called.has(n)) registrarNumero(n);
+  }
 };
 
 /* ══════════════════════════════════════════════════════════
