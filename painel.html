@@ -204,6 +204,21 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
       <a href="cadastro.html" target="_blank" class="btn btn-ghost btn-sm" title="Abrir Cadastro"><i class="ti ti-clipboard"></i> Cadastro</a>
       <a href="index.html" class="btn btn-ghost btn-sm" title="Página inicial"><i class="ti ti-home"></i></a>
     </div>
+    <div class="topbar-links" style="border-top:1px solid #2a2a2a;width:100%;padding-top:6px;margin-top:2px">
+      <span style="font-size:11px;color:#666;align-self:center;margin-right:2px">Trocar tela em todos os aparelhos:</span>
+      <button class="btn btn-ghost btn-sm" onclick="trocarTela('datashow.html')" title="Todas as telas conectadas passam a mostrar o Sorteio">
+        <i class="ti ti-device-tv"></i> Sorteio
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="trocarTela('patrocinadores.html')" title="Todas as telas conectadas passam a mostrar Patrocinadores">
+        <i class="ti ti-star"></i> Patrocinadores
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="trocarTela('video.html')" title="Todas as telas conectadas passam a mostrar Vídeo">
+        <i class="ti ti-player-play"></i> Vídeo
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="trocarTela('entrevista.html')" title="Todas as telas conectadas passam a mostrar Entrevista">
+        <i class="ti ti-video"></i> Entrevista
+      </button>
+    </div>
   </div>
 
   <div class="main" id="mainContent" style="display:none">
@@ -727,6 +742,15 @@ function entrevistaMostrar() {
 function entrevistaOcultar() {
   enviarCanal('ocultar_entrevista', {});
   fb('fbEntrevista','ok','Chamada encerrada na tela de entrevista.');
+}
+
+/* ══════════════════════════════════════════════════════════
+   TROCAR TELA EM TODOS OS APARELHOS
+   Manda qualquer tela conectada (datashow, patrocinadores, vídeo,
+   entrevista — em qualquer computador/TV) navegar pra outra página.
+══════════════════════════════════════════════════════════ */
+function trocarTela(arquivo){
+  enviarCanal('trocar_tela', { arquivo: arquivo });
 }
 
 /* ══════════════════════════════════════════════════════════
